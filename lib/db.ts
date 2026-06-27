@@ -8,7 +8,7 @@ if (!MONGODB_URI) {
   );
 }
 
-let cached = globalThis.mongooseCached || {
+const cached = globalThis.mongooseCached || {
   conn: null,
   promise: null,
 };
