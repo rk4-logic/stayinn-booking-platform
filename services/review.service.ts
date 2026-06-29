@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Review from "@/models/Review";
 import Booking from "@/models/Booking";

@@ -4,7 +4,6 @@ import { IBooking, BookingStatus, PaymentStatus } from "@/types/booking.types";
 import { getPaginationMeta, normalizePagination } from "@/lib/utils/pagination";
 import { toObjectId } from "@/lib/utils/object-id";
 import { ACTIVE_FILTER } from "@/lib/db/query";
-import { ACTIVE_BOOKING_STATUSES } from "@/lib/constants/booking";
 import { checkRoomAvailability } from "@/services/room.service";
 
 export interface CreateBookingData {

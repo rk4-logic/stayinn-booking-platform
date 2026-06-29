@@ -1,8 +1,5 @@
-import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Property from "@/models/Property";
-import Room from "@/models/Room";
-import Review from "@/models/Review";
 import { IProperty, PropertyStatus } from "@/types/property.types";
 import { generateUniqueSlug } from "@/lib/utils/slug";
 import { getPaginationMeta } from "@/lib/utils/pagination";
