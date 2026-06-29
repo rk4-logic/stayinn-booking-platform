@@ -20,3 +20,16 @@ export function getPaginationMeta(
     hasPrevPage: page > 1,
   };
 }
+
+export function normalizePagination(
+  page = 1,
+  limit = 10
+): { page: number; limit: number; skip: number } {
+  const safePage = Math.max(1, page);
+  const safeLimit = Math.min(Math.max(1, limit), 100);
+  return {
+    page: safePage,
+    limit: safeLimit,
+    skip: (safePage - 1) * safeLimit,
+  };
+}

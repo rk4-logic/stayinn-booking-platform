@@ -1,0 +1,1 @@
+export const ACTIVE_FILTER = { isDeleted: false } as const;
