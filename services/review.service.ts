@@ -32,7 +32,6 @@ export async function createReview(data: CreateReviewData) {
     throw new Error("You can only review after your stay is completed");
   }
 
-  // verifiedStay set by service only — never manually
   const review = await Review.create({ ...data, verifiedStay: true });
 
   await updatePropertyRating(data.propertyId);
