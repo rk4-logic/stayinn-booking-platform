@@ -16,7 +16,7 @@ export interface ILocation {
   formattedAddress?: string;
   latitude: number;
   longitude: number;
-  coordinates: {
+  coordinates?: {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   };
@@ -36,3 +36,7 @@ export enum Currency {
   EUR = "EUR",
   INR = "INR",
 }
+
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string | Record<string, string[]> };
