@@ -43,3 +43,19 @@ export interface IProperty extends IBaseDocument {
   status: PropertyStatus;
   currency: Currency;
 }
+
+export interface PropertyCardData {
+  _id: string;
+  name: string;
+  slug: string;
+  location: {
+    city: string;
+    country: string;
+  };
+  images: { url: string; publicId: string; isCover: boolean }[];
+  rating: number;
+  totalReviews: number;
+  startingPrice: number;
+  currency: string;
+  propertyType: PropertyType;
+}
