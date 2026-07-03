@@ -59,3 +59,15 @@ export interface PropertyCardData {
   currency: string;
   propertyType: PropertyType;
 }
+
+export interface PropertySearchFilters {
+  city?: string;
+  country?: string;
+  propertyType?: PropertyType;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+}
+
+export type PropertyCardInput = Pick<IProperty, "_id" | "name" | "slug" | "location" | "images" | "rating" | "totalReviews" | "startingPrice" | "currency" | "propertyType">;
