@@ -71,3 +71,37 @@ export interface PropertySearchFilters {
 }
 
 export type PropertyCardInput = Pick<IProperty, "_id" | "name" | "slug" | "location" | "images" | "rating" | "totalReviews" | "startingPrice" | "currency" | "propertyType">;
+
+export interface GalleryImage {
+  url: string;
+  alt?: string;
+  isCover: boolean;
+}
+
+export interface PropertyGalleryProps {
+  images: GalleryImage[];
+  name: string;
+}
+
+export interface PropertyInfoProps {
+  property: {
+    name: string;
+    description: string;
+    propertyType: string;
+    location: {
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+      formattedAddress?: string;
+    };
+    contact: {
+      phone: string;
+      whatsapp?: string;
+      email?: string;
+    };
+    amenities: string[];
+    rating: number;
+    totalReviews: number;
+  };
+}

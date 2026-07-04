@@ -35,3 +35,8 @@ export interface IBooking extends IBaseDocument {
   status: BookingStatus;
   paymentStatus: PaymentStatus;
 }
+
+export interface BookingWidgetProps {
+  propertyId: string;
+  currency: string;
+}

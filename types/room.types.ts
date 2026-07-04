@@ -37,3 +37,21 @@ export interface IRoom extends IBaseDocument {
   amenities: string[]; 
   isAvailable: boolean;
 }
+
+export interface Room {
+  _id: unknown;
+  roomName: string;
+  roomType: string;
+  bedType: string;
+  beds: number;
+  maxGuests: number;
+  pricePerNight: number;
+  amenities?: string[];
+  isAvailable: boolean;
+}
+
+export interface RoomListProps {
+  rooms: Room[];
+  propertyId: string;
+  currency: string;
+}

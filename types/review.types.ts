@@ -10,3 +10,18 @@ export interface IReview extends IBaseDocument {
   ownerReply?: string;       
   verifiedStay: boolean;
 }
+
+export interface Review {
+  _id: unknown;
+  review: string;
+  rating: number;
+  createdAt: Date | string;
+  verifiedStay: boolean;
+  userId: unknown;
+}
+
+export interface ReviewListProps {
+  reviews: Review[];
+  rating: number;
+  totalReviews: number;
+}
