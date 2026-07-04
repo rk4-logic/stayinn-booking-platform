@@ -40,3 +40,29 @@ export interface BookingWidgetProps {
   propertyId: string;
   currency: string;
 }
+
+export interface BookingListItem {
+  _id: string;
+  checkIn: Date | string;
+  checkOut: Date | string;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+  totalPrice: number;
+  currency: string;
+  guests: {
+    adults: number;
+    children: number;
+    infants: number;
+  };
+  propertyId: {
+    name?: string;
+    location?: {
+      city?: string;
+      country?: string;
+    };
+  } | null;
+  roomId: {
+    roomName?: string;
+    roomType?: string;
+  } | null;
+}

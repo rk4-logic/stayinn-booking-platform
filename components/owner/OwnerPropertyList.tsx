@@ -13,20 +13,13 @@ import { formatCurrency } from "@/lib/utils/formatCurrency";
 import { formatPropertyType } from "@/lib/utils/formatPropertyType";
 import { PropertyStatus } from "@/types/property.types";
 import type { IProperty } from "@/types/property.types";
+import { PROPERTY_STATUS_COLORS } from "@/lib/constants/status";
 
 type OwnerProperty = Pick<IProperty, "_id" | "name" | "slug" | "propertyType" | "status" | "startingPrice" | "currency" | "totalReviews" | "rating" | "images" | "location">;
 
 interface OwnerPropertyListProps {
   properties: OwnerProperty[];
 }
-
-const statusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  pending: "bg-yellow-100 text-yellow-700",
-  approved: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-  inactive: "bg-gray-100 text-gray-500",
-};
 
 export default function OwnerPropertyList({
   properties,
@@ -94,9 +87,8 @@ export default function OwnerPropertyList({
                     </p>
                   </div>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${
-                      statusColors[property.status] ?? statusColors.draft
-                    }`}
+                    className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${PROPERTY_STATUS_COLORS[property.status] ?? PROPERTY_STATUS_COLORS.draft
+                      }`}
                   >
                     {property.status}
                   </span>
