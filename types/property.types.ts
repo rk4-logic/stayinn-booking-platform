@@ -105,3 +105,46 @@ export interface PropertyInfoProps {
     totalReviews: number;
   };
 }
+
+export interface PropertyFormProps {
+  propertyId?: string;
+  initialData?: {
+    name: string;
+    description: string;
+    propertyType: string;
+    currency: string;
+    location: {
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode?: string;
+      latitude: number;
+      longitude: number;
+    };
+    contact: {
+      phone: string;
+      whatsapp?: string;
+      email?: string;
+    };
+    amenities: string[];
+  };
+}
+
+export interface IProperty extends IBaseDocument {
+  ownerId: Types.ObjectId;
+  name: string;
+  slug: string;
+  description: string;
+  propertyType: PropertyType;
+  location: ILocation;
+  contact: IPropertyContact;
+  amenities: string[];
+  images: IImage[];
+  rating: number;
+  totalReviews: number;
+  startingPrice: number;
+  isFeatured: boolean;
+  status: PropertyStatus;
+  currency: Currency;
+}

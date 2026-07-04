@@ -55,3 +55,25 @@ export interface RoomListProps {
   propertyId: string;
   currency: string;
 }
+
+export interface RoomManagerProps {
+  propertyId: string;
+  rooms: Room[];
+  currency: string;
+}
+
+export interface IRoom extends IBaseDocument {
+  propertyId: Types.ObjectId;
+  roomName: string;
+  roomType: RoomType;
+  bedType: BedType;
+  beds: number;
+  maxGuests: number;
+  pricePerNight: number;
+  currency: Currency;
+  roomSize?: number;
+  roomSizeUnit?: RoomSizeUnit;
+  images: IImage[];
+  amenities: string[];
+  isAvailable: boolean;
+}
