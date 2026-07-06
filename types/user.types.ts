@@ -1,18 +1,20 @@
+import type { Types } from "mongoose";
+import type { IBaseDocument } from "./common.types";
+
 export enum UserRole {
   CUSTOMER = "customer",
   OWNER = "owner",
   ADMIN = "admin",
 }
 
-export interface IUser {
+export interface IUser extends IBaseDocument {
+  _id: Types.ObjectId;
   clerkId: string;
   email: string;
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
   role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface SyncUserData {

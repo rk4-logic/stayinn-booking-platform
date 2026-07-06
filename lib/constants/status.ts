@@ -14,3 +14,9 @@ export const PROPERTY_STATUS_COLORS: Record<string, string> = {
   rejected: "bg-red-100 text-red-700",
   inactive: "bg-gray-100 text-gray-500",
 };
+
+export const ROLE_COLORS: Record<string, string> = {
+  customer: "bg-gray-100 text-gray-700",
+  owner: "bg-blue-100 text-blue-700",
+  admin: "bg-purple-100 text-purple-700",
+};

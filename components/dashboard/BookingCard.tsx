@@ -28,7 +28,9 @@ export default function BookingCard({ booking, onCancel }: BookingCardProps) {
             {booking.propertyId?.name ?? "Property"}
           </h3>
           {booking.roomId?.roomName && (
-            <p className="text-sm text-gray-500">{booking.roomId.roomName}</p>
+            <p className="text-sm text-gray-500">
+              {booking.roomId.roomName}
+            </p>
           )}
         </div>
         <BookingStatusBadge status={booking.status} />
@@ -54,7 +56,8 @@ export default function BookingCard({ booking, onCancel }: BookingCardProps) {
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
           <span>
-            {booking.guests.adults} adult{booking.guests.adults > 1 ? "s" : ""}
+            {booking.guests.adults} adult
+            {booking.guests.adults > 1 ? "s" : ""}
             {booking.guests.children > 0 &&
               `, ${booking.guests.children} child`}
           </span>
@@ -71,7 +74,6 @@ export default function BookingCard({ booking, onCancel }: BookingCardProps) {
             {formatPaymentStatus(booking.paymentStatus)}
           </Badge>
         </div>
-
         {canCancel && (
           <Button
             variant="destructive"

@@ -40,3 +40,17 @@ export async function requireRole(...roles: UserRole[]) {
 
   return user;
 }
+
+export async function getUsersAction() {
+  await requireRole(UserRole.ADMIN);
+
+  const { connectDB } = await import("@/lib/db");
+  const User = (await import("@/models/User")).default;
+
+  await connectDB();
+
+  return User.find({})
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+}
