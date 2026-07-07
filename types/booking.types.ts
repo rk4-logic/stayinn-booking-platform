@@ -66,3 +66,33 @@ export interface BookingListItem {
     roomType?: string;
   } | null;
 }
+
+export interface BookingDates {
+  checkIn: Date | null;
+  checkOut: Date | null;
+}
+
+export interface BookingGuests {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
+export interface BookingSelection {
+  propertyId: string;
+  propertyName: string;
+  roomId: string;
+  roomName: string;
+  pricePerNight: number;
+  currency: Currency;
+}
+
+export interface BookingStore {
+  dates: BookingDates;
+  guests: BookingGuests;
+  selection: BookingSelection | null;
+  setDates: (dates: BookingDates) => void;
+  setGuests: (guests: Partial<BookingGuests>) => void;
+  setSelection: (selection: BookingSelection) => void;
+  clearBooking: () => void;
+}
