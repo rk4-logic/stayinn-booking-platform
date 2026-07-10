@@ -148,3 +148,13 @@ export interface IProperty extends IBaseDocument {
   status: PropertyStatus;
   currency: Currency;
 }
+
+export interface UsePropertiesOptions extends Record<string, unknown> {
+  city?: string;
+  country?: string;
+  propertyType?: PropertyType;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+}
