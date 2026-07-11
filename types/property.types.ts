@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { IBaseDocument, IImage, ILocation, Currency } from "./common.types";
+import type { UploadedImage } from "./image.types";
 
 export enum PropertyStatus {
   DRAFT = "draft",
@@ -58,4 +59,107 @@ export interface PropertyCardData {
   startingPrice: number;
   currency: string;
   propertyType: PropertyType;
+<<<<<<< Updated upstream
+=======
+}
+
+export interface PropertySearchFilters {
+  city?: string;
+  country?: string;
+  propertyType?: PropertyType;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+}
+
+export type PropertyCardInput = Pick<IProperty, "_id" | "name" | "slug" | "location" | "images" | "rating" | "totalReviews" | "startingPrice" | "currency" | "propertyType">;
+
+export interface GalleryImage {
+  url: string;
+  alt?: string;
+  isCover: boolean;
+}
+
+export interface PropertyGalleryProps {
+  images: GalleryImage[];
+  name: string;
+}
+
+export interface PropertyInfoProps {
+  property: {
+    name: string;
+    description: string;
+    propertyType: string;
+    location: {
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+      formattedAddress?: string;
+    };
+    contact: {
+      phone: string;
+      whatsapp?: string;
+      email?: string;
+    };
+    amenities: string[];
+    rating: number;
+    totalReviews: number;
+  };
+}
+
+export interface PropertyFormProps {
+  propertyId?: string;
+  initialData?: {
+    name: string;
+    description: string;
+    propertyType: string;
+    currency: string;
+    location: {
+      address: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode?: string;
+      latitude: number;
+      longitude: number;
+    };
+    contact: {
+      phone: string;
+      whatsapp?: string;
+      email?: string;
+    };
+    amenities: string[];
+    images?: UploadedImage[];
+  };
+}
+
+export interface IProperty extends IBaseDocument {
+  ownerId: Types.ObjectId;
+  name: string;
+  slug: string;
+  description: string;
+  propertyType: PropertyType;
+  location: ILocation;
+  contact: IPropertyContact;
+  amenities: string[];
+  images: IImage[];
+  rating: number;
+  totalReviews: number;
+  startingPrice: number;
+  isFeatured: boolean;
+  status: PropertyStatus;
+  currency: Currency;
+}
+
+export interface UsePropertiesOptions extends Record<string, unknown> {
+  city?: string;
+  country?: string;
+  propertyType?: PropertyType;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+>>>>>>> Stashed changes
 }
