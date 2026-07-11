@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { IBaseDocument, IImage, ILocation, Currency } from "./common.types";
+import type { UploadedImage } from "./image.types";
 
 export enum PropertyStatus {
   DRAFT = "draft",
@@ -128,6 +129,7 @@ export interface PropertyFormProps {
       email?: string;
     };
     amenities: string[];
+    images?: UploadedImage[];
   };
 }
 

@@ -20,6 +20,8 @@ import {
 import { PROPERTY_TYPE_OPTIONS } from "@/lib/constants/property";
 import { Currency } from "@/types/common.types";
 import type { PropertyFormProps } from "@/types/property.types";
+import ImageUploader from "@/components/upload/ImageUploader";
+import { UploadedImage } from "@/types/image.types";
 
 
 export default function PropertyForm({
@@ -68,6 +70,7 @@ export default function PropertyForm({
   const [amenities, setAmenities] = useState(
     initialData?.amenities.join(", ") ?? ""
   );
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
   const handleSubmit = async () => {
     if (!name.trim()) return toast.error("Property name is required");
@@ -105,6 +108,7 @@ export default function PropertyForm({
         .split(",")
         .map((a) => a.trim())
         .filter(Boolean),
+      images: uploadedImages,
     };
 
     const result = propertyId
@@ -287,7 +291,7 @@ export default function PropertyForm({
               placeholder="contact@hotel.com"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
@@ -311,6 +315,19 @@ export default function PropertyForm({
         </div>
       </section>
 
+      {/* Images */}
+      <section className="space-y-4">
+        <h3 className="font-semibold text-gray-900 border-b pb-2">
+          Property Images
+        </h3>
+        <ImageUploader
+          initialImages={initialData?.images ?? []}
+          onChange={setUploadedImages}
+          folder="stayinn/properties"
+          maxFiles={10}
+        />
+      </section>
+
       <Button
         className="w-full"
         onClick={handleSubmit}
@@ -320,8 +337,8 @@ export default function PropertyForm({
         {loading
           ? "Saving..."
           : propertyId
-          ? "Update Property"
-          : "Create Property"}
+            ? "Update Property"
+            : "Create Property"}
       </Button>
     </div>
   );

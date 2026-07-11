@@ -31,6 +31,7 @@ export default async function EditPropertyPage({ params }: PageProps) {
             location: property.location,
             contact: property.contact,
             amenities: property.amenities ?? [],
+            images: property.images ?? [],
           }}
         />
       </Container>
