@@ -1,5 +1,7 @@
 import { Types } from "mongoose";
 import { IBaseDocument, Currency } from "./common.types";
+import type { Property } from "./property.types";
+import type { Room } from "./room.types";
 
 export enum BookingStatus {
   PENDING = "pending",
@@ -87,6 +89,14 @@ export interface BookingSelection {
   currency: Currency;
 }
 
+export interface BookingFlowProps {
+  property: Property;
+  availableRooms: Room[];
+  checkIn: Date;
+  checkOut: Date;
+  guestCount: number;
+}
+
 export interface BookingStore {
   dates: BookingDates;
   guests: BookingGuests;
@@ -95,4 +105,15 @@ export interface BookingStore {
   setGuests: (guests: Partial<BookingGuests>) => void;
   setSelection: (selection: BookingSelection) => void;
   clearBooking: () => void;
+}
+
+export interface BookingConfirmationProps {
+  bookingId: string;
+  propertyName: string;
+  roomName: string;
+  checkIn: Date;
+  checkOut: Date;
+  nights: number;
+  totalPrice: number;
+  currency: string;
 }

@@ -160,3 +160,15 @@ export interface UsePropertiesOptions extends Record<string, unknown> {
   page?: number;
   limit?: number;
 }
+
+export interface Property {
+  _id: unknown;
+  name: string;
+  slug: string;
+  location: {
+    city: string;
+    country: string;
+  };
+  currency: string;
+  images: { url: string; isCover: boolean }[];
+}

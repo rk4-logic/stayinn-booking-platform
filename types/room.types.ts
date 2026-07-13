@@ -50,6 +50,12 @@ export interface Room {
   isAvailable: boolean;
 }
 
+export interface RoomSelectorProps {
+  rooms: Room[];
+  currency: string;
+  onSelect: (room: Room) => void;
+}
+
 export interface RoomListProps {
   rooms: Room[];
   propertyId: string;
