@@ -5,16 +5,21 @@ import { formatPropertyType } from "@/lib/utils/formatPropertyType";
 import type { PropertyInfoProps } from "@/types/property.types";
 
 export default function PropertyInfo({ property }: PropertyInfoProps) {
+  const location = property.location ?? {};
+  const contact = property.contact ?? {};
+  const locationParts = [location.address, location.city, location.state, location.country].filter(Boolean);
+  const locationText = location.formattedAddress || locationParts.join(", ") || "Location unavailable";
+
   return (
     <div className="space-y-6">
       {/* Type + Rating */}
       <div className="flex items-center gap-3">
         <Badge variant="secondary" className="capitalize">
-          {formatPropertyType(property.propertyType)}
+          {formatPropertyType(property.propertyType || "property")}
         </Badge>
         <Rating
-          rating={property.rating}
-          totalReviews={property.totalReviews}
+          rating={property.rating ?? 0}
+          totalReviews={property.totalReviews ?? 0}
           size="md"
         />
       </div>
@@ -22,10 +27,7 @@ export default function PropertyInfo({ property }: PropertyInfoProps) {
       {/* Location */}
       <div className="flex items-start gap-2 text-gray-600">
         <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-        <span className="text-sm">
-          {property.location.formattedAddress ??
-            `${property.location.address}, ${property.location.city}, ${property.location.state}, ${property.location.country}`}
-        </span>
+        <span className="text-sm">{locationText}</span>
       </div>
 
       {/* Description */}
@@ -34,7 +36,7 @@ export default function PropertyInfo({ property }: PropertyInfoProps) {
           About this property
         </h2>
         <p className="text-gray-600 text-sm leading-relaxed">
-          {property.description}
+          {property.description || "No description available yet."}
         </p>
       </div>
 
@@ -62,18 +64,18 @@ export default function PropertyInfo({ property }: PropertyInfoProps) {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Phone className="h-4 w-4" />
-            <span>{property.contact.phone}</span>
+            <span>{contact.phone || "Phone not available"}</span>
           </div>
-          {property.contact.whatsapp && (
+          {contact.whatsapp && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <MessageCircle className="h-4 w-4" />
-              <span>{property.contact.whatsapp}</span>
+              <span>{contact.whatsapp}</span>
             </div>
           )}
-          {property.contact.email && (
+          {contact.email && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Mail className="h-4 w-4" />
-              <span>{property.contact.email}</span>
+              <span>{contact.email}</span>
             </div>
           )}
         </div>

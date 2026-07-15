@@ -10,6 +10,8 @@ export default function ReviewList({
     rating,
     totalReviews,
 }: ReviewListProps) {
+    const safeReviews = reviews ?? [];
+
     return (
         <div>
             <div className="flex items-center gap-3 mb-6">
@@ -25,7 +27,7 @@ export default function ReviewList({
                 )}
             </div>
 
-            {reviews.length === 0 ? (
+            {safeReviews.length === 0 ? (
                 <EmptyState
                     icon={MessageSquare}
                     title="No reviews yet"
@@ -33,7 +35,7 @@ export default function ReviewList({
                 />
             ) : (
                 <div className="space-y-6">
-                    {reviews.map((review) => (
+                    {safeReviews.map((review) => (
                         <div key={String(review._id)} className="border-b pb-6 last:border-0">
                             <div className="flex items-start justify-between mb-2">
                                 <div>

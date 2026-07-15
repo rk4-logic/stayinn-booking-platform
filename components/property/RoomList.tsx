@@ -6,7 +6,9 @@ import { formatPropertyType } from "@/lib/utils/formatPropertyType";
 import type { RoomListProps } from "@/types/room.types";
 
 export default function RoomList({ rooms, currency }: RoomListProps) {
-  if (!rooms || rooms.length === 0) {
+  const safeRooms = rooms ?? [];
+
+  if (safeRooms.length === 0) {
     return (
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -26,7 +28,7 @@ export default function RoomList({ rooms, currency }: RoomListProps) {
         Available Rooms
       </h2>
       <div className="space-y-4">
-        {rooms.map((room) => (
+        {safeRooms.map((room) => (
           <div
             key={String(room._id)}
             className="border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"

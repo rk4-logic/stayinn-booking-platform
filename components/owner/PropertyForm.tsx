@@ -22,6 +22,7 @@ import { Currency } from "@/types/common.types";
 import type { PropertyFormProps } from "@/types/property.types";
 import ImageUploader from "@/components/upload/ImageUploader";
 import { UploadedImage } from "@/types/image.types";
+import AIDescriptionGenerator from "../ai/AIDescriptionGenerator";
 
 
 export default function PropertyForm({
@@ -157,6 +158,15 @@ export default function PropertyForm({
           />
         </div>
 
+        <AIDescriptionGenerator
+          propertyName={name}
+          propertyType={propertyType}
+          location={`${city}, ${country}`}
+          amenities={amenities.split(",").map((a) => a.trim()).filter(Boolean)}
+          onGenerated={(desc) => setDescription(desc)}
+        />
+
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Property Type *</Label>
@@ -291,7 +301,7 @@ export default function PropertyForm({
               placeholder="contact@hotel.com"
               type="email"
               value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>

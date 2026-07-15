@@ -32,14 +32,30 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function PropertyDetailsPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const property = await getPropertyBySlugAction(slug);
+  let property;
+
+  try {
+    property = await getPropertyBySlugAction(slug);
+  } catch (error) {
+    console.error("Failed to load property details:", error);
+    notFound();
+  }
 
   if (!property) notFound();
 
-  const [roomsResult, reviewsResult] = await Promise.all([
-    getRoomsByPropertyAction(String(property._id)),
-    getPropertyReviewsAction(String(property._id)),
-  ]);
+  let roomsResult;
+  let reviewsResult;
+
+  try {
+    [roomsResult, reviewsResult] = await Promise.all([
+      getRoomsByPropertyAction(String(property._id)),
+      getPropertyReviewsAction(String(property._id)),
+    ]);
+  } catch (error) {
+    console.error("Failed to load property related data:", error);
+    roomsResult = { rooms: [] };
+    reviewsResult = { reviews: [] };
+  }
 
   return (
     <div className="bg-white min-h-screen">
