@@ -20,3 +20,15 @@ export const ROLE_COLORS: Record<string, string> = {
   owner: "bg-blue-100 text-blue-700",
   admin: "bg-purple-100 text-purple-700",
 };
+
+export enum OwnerRequestStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}
+
+export const statusColors: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-700",
+  approved: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+};

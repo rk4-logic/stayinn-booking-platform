@@ -36,30 +36,32 @@ export default function MobileMenu() {
         <div className="absolute top-16 left-0 right-0 z-50 flex flex-col gap-4 border-b bg-white px-4 py-6 shadow-lg">
 
           {/* Public navigation */}
-          {NAV_ITEMS.filter((item) => item.public).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-gray-600 hover:text-gray-900"
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.filter(
+            item => item.visibility === "public").map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-gray-600 hover:text-gray-900"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
 
           {isSignedIn ? (
             <>
               {/* Protected navigation */}
-              {NAV_ITEMS.filter((item) => !item.public).map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {NAV_ITEMS.filter(
+                item => item.visibility === "authenticated").map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
 
               <div className="pt-2">
                 <UserButton />

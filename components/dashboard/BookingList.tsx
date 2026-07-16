@@ -12,9 +12,10 @@ import type { BookingListItem } from "@/types/booking.types";
 
 interface BookingListProps {
   bookings: BookingListItem[];
+  showCancelButton?: boolean;
 }
 
-export default function BookingList({ bookings }: BookingListProps) {
+export default function BookingList({ bookings, showCancelButton = true }: BookingListProps) {
   const router = useRouter();
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,7 @@ export default function BookingList({ bookings }: BookingListProps) {
             key={booking._id}
             booking={booking}
             onCancel={setCancellingId}
+            showCancelButton={showCancelButton}
           />
         ))}
       </div>

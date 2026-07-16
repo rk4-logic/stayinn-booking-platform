@@ -2,12 +2,10 @@ import { redirect } from "next/navigation";
 import { getAuthenticatedUser } from "@/actions/user.actions";
 import { UserRole } from "@/types/user.types";
 import Link from "next/link";
-import { Building2, Users, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
+import { ADMIN_NAV } from "@/lib/constants/navigation";
 
-const ADMIN_NAV = [
-  { label: "Properties", href: "/admin/properties", icon: Building2 },
-  { label: "Users", href: "/admin/users", icon: Users },
-];
+
 
 export default async function AdminLayout({
   children,

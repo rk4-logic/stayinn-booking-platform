@@ -12,9 +12,14 @@ import { BookingStatus, type BookingListItem } from "@/types/booking.types";
 interface BookingCardProps {
   booking: BookingListItem;
   onCancel: (id: string) => void;
+  showCancelButton?: boolean;
 }
 
-export default function BookingCard({ booking, onCancel }: BookingCardProps) {
+export default function BookingCard({
+  booking,
+  onCancel,
+  showCancelButton = true,
+}: BookingCardProps) {
   const canCancel =
     booking.status === BookingStatus.PENDING ||
     booking.status === BookingStatus.CONFIRMED;
@@ -74,7 +79,7 @@ export default function BookingCard({ booking, onCancel }: BookingCardProps) {
             {formatPaymentStatus(booking.paymentStatus)}
           </Badge>
         </div>
-        {canCancel && (
+        {showCancelButton && canCancel && (
           <Button
             variant="destructive"
             size="sm"

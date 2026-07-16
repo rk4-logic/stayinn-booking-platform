@@ -1,25 +1,12 @@
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Booking from "@/models/Booking";
-import { IBooking, BookingStatus, PaymentStatus } from "@/types/booking.types";
+import Property from "@/models/Property";
+import { BookingStatus, PaymentStatus, type CreateBookingData } from "@/types/booking.types";
 import { getPaginationMeta, normalizePagination } from "@/lib/utils/pagination";
 import { toObjectId } from "@/lib/utils/object-id";
 import { ACTIVE_FILTER } from "@/lib/db/query";
 import { checkRoomAvailability } from "@/services/room.service";
-
-export interface CreateBookingData {
-  userId: string;
-  propertyId: string;
-  roomId: string;
-  checkIn: Date;
-  checkOut: Date;
-  guests: {
-    adults: number;
-    children?: number;
-    infants?: number;
-  };
-  pricePerNight: number;
-  currency?: IBooking["currency"];
-}
 
 function calculateTotalPrice(
   checkIn: Date,
@@ -50,24 +37,39 @@ export async function createBooking(data: CreateBookingData) {
     data.pricePerNight
   );
 
-  const booking = await Booking.create({
-    userId: data.userId,
-    propertyId: data.propertyId,
-    roomId: data.roomId,
-    checkIn: data.checkIn,
-    checkOut: data.checkOut,
-    guests: {
-      adults: data.guests.adults,
-      children: data.guests.children ?? 0,
-      infants: data.guests.infants ?? 0,
-    },
-    totalPrice,
-    currency: data.currency,
-    status: BookingStatus.PENDING,
-    paymentStatus: PaymentStatus.UNPAID,
-  });
+  try {
+    // Create booking with PENDING status
+    // Payment must be completed to confirm
+    const booking = await Booking.create({
+      userId: data.userId,
+      propertyId: data.propertyId,
+      roomId: data.roomId,
+      checkIn: data.checkIn,
+      checkOut: data.checkOut,
+      guests: {
+        adults: data.guests.adults,
+        children: data.guests.children ?? 0,
+        infants: data.guests.infants ?? 0,
+      },
+      totalPrice,
+      currency: data.currency,
+      status: BookingStatus.PENDING,
+      paymentStatus: PaymentStatus.UNPAID,
+    });
 
-  return booking.toObject();
+    return booking.toObject();
+  } catch (error: unknown) {
+    // Handle duplicate booking attempt
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: number }).code === 11000
+    ) {
+      throw new Error("This room was just booked. Please select different dates.");
+    }
+    throw error;
+  }
 }
 
 export async function getBookingById(bookingId: string) {
@@ -118,6 +120,53 @@ export async function getPropertyBookings(
       .populate("roomId", "roomName roomType")
       .lean(),
     Booking.countDocuments({ propertyId, ...ACTIVE_FILTER }),
+  ]);
+
+  return { bookings, ...getPaginationMeta(total, safePage, safeLimit) };
+}
+
+export async function getOwnerBookings(ownerId: string, page = 1, limit = 10) {
+  await connectDB();
+
+  const { page: safePage, limit: safeLimit, skip } = normalizePagination(page, limit);
+
+  const ownerProperties = await Property.find({
+    ownerId: toObjectId(ownerId),
+    isDeleted: { $ne: true },
+  })
+    .select("_id")
+    .lean<Array<{ _id: string | mongoose.Types.ObjectId }>>();
+
+  const propertyObjectIds = ownerProperties.map((property) => {
+    if (property._id instanceof mongoose.Types.ObjectId) {
+      return property._id;
+    }
+
+    return toObjectId(property._id);
+  });
+
+  if (propertyObjectIds.length === 0) {
+    return {
+      bookings: [],
+      page: safePage,
+      limit: safeLimit,
+      total: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false,
+    };
+  }
+
+  const [bookings, total] = await Promise.all([
+    Booking.find({ propertyId: { $in: propertyObjectIds }, ...ACTIVE_FILTER })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .populate("userId", "firstName lastName email imageUrl")
+      .populate("propertyId", "name slug images location")
+      .populate("roomId", "roomName roomType pricePerNight")
+      .lean(),
+    Booking.countDocuments({ propertyId: { $in: propertyObjectIds }, ...ACTIVE_FILTER }),
   ]);
 
   return { bookings, ...getPaginationMeta(total, safePage, safeLimit) };

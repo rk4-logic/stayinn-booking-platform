@@ -7,6 +7,7 @@ import {
   getBookingById,
   getUserBookings,
   getPropertyBookings,
+  getOwnerBookings,
   cancelBooking,
   updateBookingStatus,
   updatePaymentStatus,
@@ -59,6 +60,11 @@ export async function getPropertyBookingsAction(
 ) {
   await getAuthenticatedUser();
   return getPropertyBookings(propertyId, page, limit);
+}
+
+export async function getOwnerBookingsAction(page = 1, limit = 10) {
+  const user = await requireRole(UserRole.OWNER, UserRole.ADMIN);
+  return getOwnerBookings(user._id.toString(), page, limit);
 }
 
 export async function cancelBookingAction(

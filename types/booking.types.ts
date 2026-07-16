@@ -38,6 +38,21 @@ export interface IBooking extends IBaseDocument {
   paymentStatus: PaymentStatus;
 }
 
+export interface CreateBookingData {
+  userId: string;
+  propertyId: string;
+  roomId: string;
+  checkIn: Date;
+  checkOut: Date;
+  guests: {
+    adults: number;
+    children?: number;
+    infants?: number;
+  };
+  pricePerNight: number;
+  currency?: IBooking["currency"];
+}
+
 export interface BookingWidgetProps {
   propertyId: string;
   currency: string;

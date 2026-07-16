@@ -4,6 +4,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import { auth } from "@clerk/nextjs/server";
 import { syncUser, getUserByClerkId } from "@/services/user.service";
 import { UserRole } from "@/types/user.types";
+import type { ActionResult } from "@/types/common.types";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
+
 
 export async function syncCurrentUser() {
   const clerkUser = await currentUser();
@@ -53,4 +57,48 @@ export async function getUsersAction() {
     .sort({ createdAt: -1 })
     .limit(50)
     .lean();
+}
+
+export async function requestOwnerRoleAction(): Promise<ActionResult<void>> {
+  try {
+    const user = await getAuthenticatedUser();
+
+    if (user.role === UserRole.OWNER) {
+      return { success: false, error: "You are already an owner" };
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      return { success: false, error: "Admins cannot become owners" };
+    }
+
+    await connectDB();
+    await User.findByIdAndUpdate(user._id, {
+      $set: { role: UserRole.OWNER },
+    });
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed",
+    };
+  }
+}
+
+export async function updateUserRoleAction(
+  userId: string,
+  role: UserRole
+): Promise<ActionResult<void>> {
+  try {
+    await requireRole(UserRole.ADMIN);
+    await connectDB();
+
+    await User.findByIdAndUpdate(userId, { $set: { role } });
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed",
+    };
+  }
 }
