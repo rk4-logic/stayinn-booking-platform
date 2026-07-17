@@ -1,37 +1,40 @@
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
-import type { SyncUserData } from "@/types/user.types";
+import { UserRole } from "@/types/user.types";
+import type { ClerkUserData } from "@/types/user.types";
 
 export async function getUserByClerkId(clerkId: string) {
   await connectDB();
-
   return User.findOne({ clerkId }).lean();
 }
 
-export async function createUser(data: SyncUserData) {
+export async function syncUser(data: ClerkUserData) {
   await connectDB();
 
-  return User.create({
-    clerkId: data.clerkId,
+  // 1. Build $set dynamically with ONLY provided fields
+  const updateFields: Record<string, string> = {
     email: data.email,
-    firstName: data.firstName ?? "",
-    lastName: data.lastName ?? "",
-    imageUrl: data.imageUrl ?? "",
-  });
-}
+  };
 
-export async function syncUser(data: SyncUserData) {
-  await connectDB();
+  if (data.firstName) updateFields.firstName = data.firstName;
+  if (data.lastName) updateFields.lastName = data.lastName;
+  if (data.imageUrl) updateFields.imageUrl = data.imageUrl;
 
-  const existingUser = await User.findOne({
-    clerkId: data.clerkId,
-  });
-
-  if (existingUser) {
-    return existingUser;
-  }
-
-  return createUser(data);
+  // 2. Perform atomic insert/update query
+  return User.findOneAndUpdate(
+    { clerkId: data.clerkId },
+    {
+      $set: updateFields,
+      $setOnInsert: {
+        clerkId: data.clerkId,
+        role: UserRole.CUSTOMER, // Set default role ONLY on creation
+      },
+    },
+    {
+      new: true,   // Return the updated document instead of the original
+      upsert: true, // Create a new document if it doesn't exist
+    }
+  );
 }
 
 export async function deleteUser(clerkId: string) {

@@ -24,3 +24,11 @@ export interface SyncUserData {
   lastName?: string | null;
   imageUrl?: string | null;
 }
+
+export interface ClerkUserData {
+  clerkId: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  imageUrl?: string | null;
+}
