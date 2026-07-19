@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { IBaseDocument, Currency } from "./common.types";
 import type { Property } from "./property.types";
 import type { Room } from "./room.types";
@@ -36,6 +36,9 @@ export interface IBooking extends IBaseDocument {
   currency: Currency;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
+  stripeSessionId?: string;
+  stripePaymentIntentId?: string;
+  paidAt?: Date;
 }
 
 export interface CreateBookingData {
@@ -131,4 +134,24 @@ export interface BookingConfirmationProps {
   nights: number;
   totalPrice: number;
   currency: string;
+}
+
+export interface IPendingCheckout {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  propertyId: mongoose.Types.ObjectId;
+  roomId: mongoose.Types.ObjectId;
+  checkIn: Date;
+  checkOut: Date;
+  guests: {
+    adults: number;
+    children: number;
+    infants: number;
+  };
+  totalPrice: number;
+  currency: string;
+  stripeSessionId?: string;
+  status: "pending" | "failed_overbooked" | "completed";
+  createdAt: Date;
+  updatedAt: Date;
 }

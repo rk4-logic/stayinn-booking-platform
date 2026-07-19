@@ -44,6 +44,19 @@ const bookingSchema = new Schema<IBooking>(
       enum: Object.values(PaymentStatus),
       default: PaymentStatus.UNPAID,
     },
+    stripeSessionId: {
+      type: String,
+      sparse: true,
+      index: true,
+    },
+    stripePaymentIntentId: {
+      type: String,
+      sparse: true,
+      index: true,
+    },
+    paidAt: {
+      type: Date,
+    },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
   },
