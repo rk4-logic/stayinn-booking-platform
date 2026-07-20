@@ -31,7 +31,7 @@ export async function syncUser(data: ClerkUserData) {
       },
     },
     {
-      new: true,   // Return the updated document instead of the original
+      returnDocument: 'after',
       upsert: true, // Create a new document if it doesn't exist
     }
   );

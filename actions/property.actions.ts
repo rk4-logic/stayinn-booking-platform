@@ -113,8 +113,17 @@ export async function getPropertiesAction(filters: GetPropertiesFilters = {}) {
 }
 
 export async function getOwnerPropertiesAction() {
-  const user = await getAuthenticatedUser();
-  return getOwnerProperties(user._id.toString());
+  try {
+    const user = await getAuthenticatedUser();
+
+    if (user.role !== UserRole.OWNER && user.role !== UserRole.ADMIN) {
+      return [];
+    }
+
+    return getOwnerProperties(user._id.toString());
+  } catch {
+    return [];
+  }
 }
 
 export async function searchPropertiesAction(

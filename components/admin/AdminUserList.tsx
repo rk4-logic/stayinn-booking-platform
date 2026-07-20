@@ -117,7 +117,7 @@ export default function AdminUserList({ users }: AdminUserListProps) {
                     disabled={
                       loadingId === userId || user.role === UserRole.ADMIN
                     }
-                    onValueChange={(value) =>
+                    onValueChange={(value: string) =>
                       handleRoleChange(userId, value as UserRole)
                     }
                   >
