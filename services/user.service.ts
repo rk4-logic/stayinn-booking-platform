@@ -11,14 +11,14 @@ export async function getUserByClerkId(clerkId: string) {
 export async function syncUser(data: ClerkUserData) {
   await connectDB();
 
-  // 1. Build $set dynamically with ONLY provided fields
-  const updateFields: Record<string, string> = {
+  // 1. Mirror Clerk identity fields exactly
+  // Empty string is a valid update (user intentionally cleared the field)
+  const updateFields = {
     email: data.email,
+    firstName: data.firstName ?? "",
+    lastName: data.lastName ?? "",
+    imageUrl: data.imageUrl ?? "",
   };
-
-  if (data.firstName) updateFields.firstName = data.firstName;
-  if (data.lastName) updateFields.lastName = data.lastName;
-  if (data.imageUrl) updateFields.imageUrl = data.imageUrl;
 
   // 2. Perform atomic insert/update query
   return User.findOneAndUpdate(
