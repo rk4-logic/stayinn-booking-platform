@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import genAI from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
-  
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json(
+      { error: "AI service not configured" },
+      { status: 503 }
+    );
   }
 
   try {
@@ -16,13 +23,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Property name is required" },
         { status: 400 }
-      );
-    }
-
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: "AI service not configured" },
-        { status: 503 }
       );
     }
 
@@ -44,26 +44,9 @@ Write a description that is:
 
 Return only the description text, no headers or formatting.`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1024,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const description = data.content[0]?.text ?? "";
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    const description = result.response.text();
 
     return NextResponse.json({ description });
   } catch (error) {

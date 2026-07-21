@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import genAI from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -7,74 +8,54 @@ export async function POST(req: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    return new Response("AI service not configured", { status: 503 });
+  }
+
   try {
     const { messages } = await req.json();
 
-    // System prompt — tells Claude what role to play
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response("Messages are required", { status: 400 });
+    }
+
     const systemPrompt = `You are a helpful travel assistant for StayInn, 
 a hotel booking platform. Help users find the perfect accommodation.
+You can help with recommending hotels, explaining property types, 
+suggesting destinations, answering questions about amenities and pricing.
+Keep responses concise and helpful. Always be friendly and professional.`;
 
-You can help with:
-- Recommending hotels based on preferences
-- Explaining different property types (hotel, villa, apartment, etc.)
-- Suggesting destinations
-- Answering questions about amenities
-- Helping users understand pricing
-
-Keep responses concise and helpful. When recommending properties,
-suggest the user use the search filters on the properties page.
-Always be friendly and professional.`;
-
-    // Stream the response back to user
-    // This means user sees text appearing word by word instead of waiting
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY!,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-6",
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages,
-        stream: true, // enable streaming
-      }),
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: systemPrompt,
     });
 
-    // Pass the stream directly to the browser
-    // TransformStream converts Anthropic's format to plain text
-    const stream = new TransformStream({
-      transform(chunk, controller) {
-        const text = new TextDecoder().decode(chunk);
-        const lines = text.split("\n").filter((line) => line.trim());
+    // convert messages to Gemini format
+    const history = messages.slice(0, -1).map((msg: { role: string; content: string }) => ({
+      role: msg.role === "assistant" ? "model" : "user",
+      parts: [{ text: msg.content }],
+    }));
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") return;
+    const lastMessage = messages[messages.length - 1];
 
-            try {
-              const parsed = JSON.parse(data);
-              // Extract text delta from streaming response
-              if (parsed.type === "content_block_delta") {
-                const textChunk = parsed.delta?.text ?? "";
-                if (textChunk) {
-                  controller.enqueue(new TextEncoder().encode(textChunk));
-                }
-              }
-            } catch {
-              // skip malformed chunks
-            }
+    const chat = model.startChat({ history });
+
+    // stream the response
+    const streamResult = await chat.sendMessageStream(lastMessage.content);
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of streamResult.stream) {
+          const text = chunk.text();
+          if (text) {
+            controller.enqueue(new TextEncoder().encode(text));
           }
         }
+        controller.close();
       },
     });
 
-    response.body?.pipeTo(stream.writable);
-
-    return new Response(stream.readable, {
+    return new Response(stream, {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (error) {
