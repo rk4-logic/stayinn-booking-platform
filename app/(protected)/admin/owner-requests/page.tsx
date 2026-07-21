@@ -3,6 +3,8 @@ import Container from "@/components/shared/Container";
 import PageHeader from "@/components/shared/PageHeader";
 import AdminOwnerRequestList from "@/components/admin/AdminOwnerRequestList";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Admin — Owner Requests — StayInn",
 };
