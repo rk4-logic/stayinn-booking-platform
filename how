@@ -1,0 +1,321 @@
+[33mcommit 020b201a37eec8285862df4e68a785d624f58505[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mmain[m[33m)[m
+Author: rk4-logic <rhtprjpt54@gmail.com>
+Date:   Tue Jul 21 15:34:34 2026 +0530
+
+    docs(readme): add initial project documentation
+
+[1mdiff --git a/README.md b/README.md[m
+[1mindex e215bc4..13e9e29 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -1,36 +1,291 @@[m
+[31m-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).[m
+[32m+[m[32m# StayInn — Full-Stack Hotel Booking Platform[m
+[32m+[m
+[32m+[m[32mStayInn is a production-grade hotel booking marketplace built with **Next.js 16, TypeScript, MongoDB, Clerk Authentication, Stripe Payments, Cloudinary, and Google Gemini AI**.[m
+[32m+[m
+[32m+[m[32mIt supports multi-role workflows (Customer, Owner, Admin), property management, booking and payment processing, AI-assisted content generation, and secure webhook-driven synchronization.[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Live Demo[m
+[32m+[m
+[32m+[m[32m**Production:** `https://stayinn-booking-platform.vercel.app/`[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Features[m
+[32m+[m
+[32m+[m[32m### Authentication & Authorization[m
+[32m+[m
+[32m+[m[32m* Clerk authentication (Email/Password + Google OAuth)[m
+[32m+[m[32m* Server-side route protection with `auth.protect()`[m
+[32m+[m[32m* Role-based access control (Customer / Owner / Admin)[m
+[32m+[m[32m* Webhook-based user synchronization with MongoDB[m
+[32m+[m
+[32m+[m[32m### Customer Features[m
+[32m+[m
+[32m+[m[32m* Browse hotel properties[m
+[32m+[m[32m* View room details and amenities[m
+[32m+[m[32m* Search and filter properties[m
+[32m+[m[32m* Create bookings[m
+[32m+[m[32m* Secure Stripe checkout[m
+[32m+[m[32m* View booking history[m
+[32m+[m
+[32m+[m[32m### Owner Features[m
+[32m+[m
+[32m+[m[32m* Submit owner request[m
+[32m+[m[32m* Create and manage properties[m
+[32m+[m[32m* Upload property images[m
+[32m+[m[32m* Manage room inventory[m
+[32m+[m[32m* View owner bookings[m
+[32m+[m
+[32m+[m[32m### Admin Features[m
+[32m+[m
+[32m+[m[32m* Review owner requests[m
+[32m+[m[32m* Approve or reject owner applications[m
+[32m+[m[32m* Manage users[m
+[32m+[m[32m* Manage platform properties[m
+[32m+[m
+[32m+[m[32m### AI Features[m
+[32m+[m
+[32m+[m[32m* AI-generated property descriptions[m
+[32m+[m[32m* AI travel assistant chat[m
+[32m+[m[32m* Powered by **Google Gemini API**[m
+[32m+[m
+[32m+[m[32m### Payments[m
+[32m+[m
+[32m+[m[32m* Stripe Checkout integration[m
+[32m+[m[32m* Webhook-driven booking confirmation[m
+[32m+[m[32m* Pending checkout reservation system[m
+[32m+[m[32m* Race-condition-safe availability checks[m
+[32m+[m[32m* Automatic cleanup of abandoned checkouts[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Tech Stack[m
+[32m+[m
+[32m+[m[32m### Frontend[m
+[32m+[m
+[32m+[m[32m* Next.js 16 (App Router)[m
+[32m+[m[32m* React 19[m
+[32m+[m[32m* TypeScript[m
+[32m+[m[32m* Tailwind CSS[m
+[32m+[m[32m* shadcn/ui[m
+[32m+[m[32m* Lucide React[m
+[32m+[m
+[32m+[m[32m### Backend[m
+[32m+[m
+[32m+[m[32m* Next.js Route Handlers[m
+[32m+[m[32m* Server Actions[m
+[32m+[m[32m* MongoDB[m
+[32m+[m[32m* Mongoose[m
+[32m+[m
+[32m+[m[32m### External Services[m
+[32m+[m
+[32m+[m[32m* Clerk[m
+[32m+[m[32m* Stripe[m
+[32m+[m[32m* Cloudinary[m
+[32m+[m[32m* Google Gemini API[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Architecture Highlights[m
+[32m+[m
+[32m+[m[32m### Resource-Based Authentication[m
+[32m+[m
+[32m+[m[32mThe project follows Clerk's latest 2026 recommendation:[m
+[32m+[m
+[32m+[m[32m* Minimal `proxy.ts`[m
+[32m+[m[32m* Authentication enforced at the **resource level**[m
+[32m+[m[32m* `await auth.protect()` used inside layouts, pages, route handlers, and server actions[m
+[32m+[m
+[32m+[m[32m### Webhook Synchronization[m
+[32m+[m
+[32m+[m[32mClerk events:[m
+[32m+[m
+[32m+[m[32m* `user.created`[m
+[32m+[m[32m* `user.updated`[m
+[32m+[m[32m* `user.deleted`[m
+[32m+[m
+[32m+[m[32mUser identity fields are mirrored exactly from Clerk while application roles remain controlled by MongoDB.[m
+[32m+[m
+[32m+[m[32m### Payment Flow[m
+[32m+[m
+[32m+[m[32mProperty → Pending Checkout → Stripe Session → Stripe Webhook → Booking Creation[m
+[32m+[m
+[32m+[m[32mThe webhook is the source of truth for payment completion.[m
+[32m+[m
+[32m+[m[32m---[m
+ [m
+ ## Getting Started[m
+ [m
+[31m-First, run the development server:[m
+[32m+[m[32m### Prerequisites[m
+[32m+[m
+[32m+[m[32m* Node.js 20+[m
+[32m+[m[32m* MongoDB Atlas[m
+[32m+[m[32m* Clerk account[m
+[32m+[m[32m* Stripe account[m
+[32m+[m[32m* Cloudinary account[m
+[32m+[m[32m* Google AI Studio account[m
+[32m+[m
+[32m+[m[32m### Installation[m
+[32m+[m
+[32m+[m[32m```bash[m
+[32m+[m[32mgit clone https://github.com/rk4-logic/stayinn-booking-platform.git[m
+[32m+[m[32mcd stayinn[m
+[32m+[m[32mnpm install[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m### Environment Variables[m
+[32m+[m
+[32m+[m[32mCreate a `.env` file:[m
+[32m+[m
+[32m+[m[32m```env[m
+[32m+[m[32mMONGODB_URI=[m
+[32m+[m
+[32m+[m[32mNEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=[m
+[32m+[m[32mCLERK_SECRET_KEY=[m
+[32m+[m[32mCLERK_WEBHOOK_SIGNING_SECRET=[m
+[32m+[m
+[32m+[m[32mCLOUDINARY_CLOUD_NAME=[m
+[32m+[m[32mCLOUDINARY_API_KEY=[m
+[32m+[m[32mCLOUDINARY_API_SECRET=[m
+[32m+[m[32mNEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=[m
+[32m+[m
+[32m+[m[32mGEMINI_API_KEY=[m
+[32m+[m
+[32m+[m[32mSTRIPE_SECRET_KEY=[m
+[32m+[m[32mSTRIPE_WEBHOOK_SECRET=[m
+[32m+[m[32mNEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=[m
+[32m+[m
+[32m+[m[32mNEXT_PUBLIC_APP_URL=http://localhost:3000[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m### Run Development Server[m
+[32m+[m
+[32m+[m[32m```bash[m
+[32m+[m[32mnpm run dev[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mOpen `http://localhost:3000`.[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Available Scripts[m
+ [m
+ ```bash[m
+ npm run dev[m
+[31m-# or[m
+[31m-yarn dev[m
+[31m-# or[m
+[31m-pnpm dev[m
+[31m-# or[m
+[31m-bun dev[m
+[32m+[m[32mnpm run build[m
+[32m+[m[32mnpm run start[m
+[32m+[m[32mnpm run lint[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Project Structure[m
+[32m+[m
+[32m+[m[32m```text[m
+[32m+[m[32mapp/[m
+[32m+[m[32m  (public)/[m
+[32m+[m[32m  (protected)/[m
+[32m+[m[32m  api/[m
+[32m+[m[32mcomponents/[m
+[32m+[m[32mactions/[m
+[32m+[m[32mservices/[m
+[32m+[m[32mmodels/[m
+[32m+[m[32mlib/[m
+[32m+[m[32mtypes/[m
+[32m+[m[32mstore/[m
+[32m+[m[32mhooks/[m
+[32m+[m[32mproxy.ts[m
+ ```[m
+ [m
+[31m-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Stripe Local Testing[m
+[32m+[m
+[32m+[m[32mInstall Stripe CLI and run:[m
+[32m+[m
+[32m+[m[32m```bash[m
+[32m+[m[32mstripe listen --forward-to localhost:3000/api/stripe/webhook[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mUse Stripe test card:[m
+[32m+[m
+[32m+[m[32m```text[m
+[32m+[m[32m4242 4242 4242 4242[m
+[32m+[m[32mAny future expiry date[m
+[32m+[m[32mAny CVC[m
+[32m+[m[32mAny ZIP[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Deployment[m
+[32m+[m
+[32m+[m[32m### Vercel[m
+[32m+[m
+[32m+[m[32mDeploy the **develop** branch for staging and **main** for production.[m
+[32m+[m
+[32m+[m[32m### Production Webhooks[m
+[32m+[m
+[32m+[m[32m#### Clerk[m
+[32m+[m
+[32m+[m[32m```text[m
+[32m+[m[32mhttps://your-domain.vercel.app/api/webhooks/clerk[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m#### Stripe[m
+[32m+[m
+[32m+[m[32m```text[m
+[32m+[m[32mhttps://your-domain.vercel.app/api/stripe/webhook[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Security Considerations[m
+[32m+[m
+[32m+[m[32m* Server-side authorization checks[m
+[32m+[m[32m* Webhook signature verification (Svix + Stripe)[m
+[32m+[m[32m* Atomic MongoDB upserts[m
+[32m+[m[32m* Role preservation during profile synchronization[m
+[32m+[m[32m* No client-side trust for privileged operations[m
+[32m+[m[32m* Availability revalidation before booking confirmation[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## Development Workflow[m
+[32m+[m
+[32m+[m[32m```text[m
+[32m+[m[32mfeat/*  →  develop  →  main[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m* `feat/*` — feature branches[m
+[32m+[m[32m* `develop` — integration/staging[m
+[32m+[m[32m* `main` — production-ready code[m
+[32m+[m
+[32m+[m[32m---[m
+ [m
+[31m-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.[m
+[32m+[m[32m## Future Improvements[m
+ [m
+[31m-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.[m
+[32m+[m[32m* Email notifications[m
+[32m+[m[32m* Review & rating system[m
+[32m+[m[32m* Map integration[m
+[32m+[m[32m* Multi-currency support[m
+[32m+[m[32m* Refund management dashboard[m
+[32m+[m[32m* Background job processing[m
+[32m+[m[32m* Analytics dashboard[m
+ [m
+[31m-## Learn More[m
+[32m+[m[32m---[m
+ [m
+[31m-To learn more about Next.js, take a look at the following resources:[m
+[32m+[m[32m## Author[m
+ [m
+[31m-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.[m
+[31m-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.[m
+[32m+[m[32m**Rohit Prajapati**[m
+ [m
+[31m-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome![m
+[32m+[m[32m* Full-Stack Developer[m
+[32m+[m[32m* React / Next.js / Node.js / TypeScript / MongoDB[m
+ [m
+[31m-## Deploy on Vercel[m
+[32m+[m[32m---[m
+ [m
+[31m-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.[m
+[32m+[m[32m## License[m
+ [m
+[31m-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.[m
+[32m+[m[32mThis project is built for educational, portfolio, and demonstration purposes.[m

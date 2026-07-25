@@ -7,6 +7,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import BookingList from "@/components/dashboard/BookingList";
 import { redirect } from "next/navigation";
 import type { BookingListItem } from "@/types/booking.types";
+import { UserRole } from "@/types/user.types";
 
 export const metadata = {
   title: "Dashboard — StayInn",
@@ -15,6 +16,9 @@ export const metadata = {
 export default async function DashboardPage() {
   const user = await getAuthenticatedUser().catch(() => null);
   if (!user) redirect("/sign-in");
+
+  if (user.role === UserRole.ADMIN) redirect("/admin/properties");
+  if (user.role === UserRole.OWNER) redirect("/owner/properties");
 
   const [bookingsResult, reviews] = await Promise.all([
     getUserBookingsAction(1, 5),

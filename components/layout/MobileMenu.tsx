@@ -1,94 +1,77 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import {
-  useAuth,
-  UserButton,
-  SignInButton,
-  SignUpButton,
-} from "@clerk/nextjs";
+import { UserRole } from "@/types/user.types";
+import AuthButtons from "./AuthButtons";
 
-import { Button } from "@/components/ui/button";
-import { NAV_ITEMS } from "@/lib/constants/navigation";
+interface MobileMenuProps {
+  role: UserRole | null;
+}
 
-
-export default function MobileMenu() {
+export default function MobileMenu({ role }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
-  const { isSignedIn } = useAuth();
 
   return (
-    <div className="md:hidden relative">
+    <div className="md:hidden">
+      {/* Toggle Button */}
       <button
-        type="button"
+        onClick={() => setOpen(!open)}
+        className="rounded-lg p-2 text-gray-700 hover:bg-gray-100"
         aria-label="Toggle menu"
-        onClick={() => setOpen((prev) => !prev)}
       >
-        {open ? (
-          <X className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
+        {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
+      {/* Full-screen Mobile Panel */}
       {open && (
-        <div className="absolute top-16 left-0 right-0 z-50 flex flex-col gap-4 border-b bg-white px-4 py-6 shadow-lg">
-
-          {/* Public navigation */}
-          {NAV_ITEMS.filter(
-            item => item.visibility === "public").map((item) => (
+        <div className="fixed inset-x-0 top-16 z-40 border-b bg-white shadow-lg">
+          <div className="max-h-[calc(100vh-4rem)] overflow-y-auto px-4 py-4">
+            <div className="flex flex-col space-y-1">
               <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                href="/properties"
                 onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                {item.label}
+                Properties
               </Link>
-            ))}
 
-          {isSignedIn ? (
-            <>
-              {/* Protected navigation */}
-              {NAV_ITEMS.filter(
-                item => item.visibility === "authenticated").map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="text-sm text-gray-600 hover:text-gray-900"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-
-              <div className="pt-2">
-                <UserButton />
-              </div>
-            </>
-          ) : (
-            <>
-              <SignInButton mode="modal">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
+              {role === UserRole.ADMIN && (
+                <Link
+                  href="/admin/properties"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50"
                 >
-                  Sign In
-                </Button>
-              </SignInButton>
+                  Admin Dashboard
+                </Link>
+              )}
 
-              <SignUpButton mode="modal">
-                <Button
-                  size="sm"
-                  className="w-full"
+              {role === UserRole.OWNER && (
+                <Link
+                  href="/owner/properties"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50"
                 >
-                  Sign Up
-                </Button>
-              </SignUpButton>
-            </>
-          )}
+                  Owner Dashboard
+                </Link>
+              )}
+
+              {role === UserRole.CUSTOMER && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Dashboard
+                </Link>
+              )}
+            </div>
+
+            <div className="mt-4 border-t pt-4">
+              <AuthButtons mobile />
+            </div>
+          </div>
         </div>
       )}
     </div>

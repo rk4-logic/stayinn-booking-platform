@@ -24,8 +24,17 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-semibold mb-4">For Owners</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/owner/properties" className="hover:text-white">List Property</Link></li>
-            <li><Link href="/owner/bookings" className="hover:text-white">Manage Bookings</Link></li>
+            <li>
+              <Link href="/dashboard" className="hover:text-white">
+                List Your Property
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/dashboard" className="hover:text-white">
+                Owner Dashboard
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

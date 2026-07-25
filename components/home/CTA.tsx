@@ -8,7 +8,7 @@ export default function CTA() {
       <p className="text-blue-100 mb-8 text-lg">
         List your property on StayInn and reach thousands of travelers.
       </p>
-      <Link href="/owner/properties">
+      <Link href="/dashboard/become-owner">
         <Button variant="secondary" size="lg">
           List Your Property
         </Button>
