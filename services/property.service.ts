@@ -44,8 +44,20 @@ export async function createProperty(data: CreatePropertyData) {
   // unique slug always generated from name — never from client input
   const slug = await generateUniqueSlug(data.name, Property);
 
+  const location = {
+    ...data.location,
+    coordinates:
+      data.location.latitude && data.location.longitude
+        ? {
+            type: "Point" as const,
+            coordinates: [data.location.longitude, data.location.latitude],
+          }
+        : undefined,
+  };
+
   const property = await Property.create({
     ...data,
+    location,
     slug,
     status: PropertyStatus.DRAFT,
     rating: 0,

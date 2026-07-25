@@ -12,15 +12,14 @@ export const locationSchema = new Schema(
     longitude: { type: Number, required: true },
     // GeoJSON for "hotels near me" — 2dsphere index on Property model
     coordinates: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+      },
     },
-    coordinates: {
-      type: [Number],
-    },
-},
   },
   { _id: false }
 );
