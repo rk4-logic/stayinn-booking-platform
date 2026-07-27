@@ -16,6 +16,7 @@ import {
 } from "@/services/review.service";
 import { type ActionResult } from "@/types/common.types";
 import { getAuthenticatedUser } from "./user.actions";
+import { serializeData } from "@/lib/utils/serialize";
 
 export async function createReviewAction(
   formData: unknown
@@ -48,7 +49,8 @@ export async function getPropertyReviewsAction(
   page = 1,
   limit = 10
 ) {
-  return getPropertyReviews(propertyId, page, limit);
+  const result = await getPropertyReviews(propertyId, page, limit);
+  return serializeData(result);
 }
 
 export async function updateReviewAction(
@@ -128,5 +130,6 @@ export async function addOwnerReplyAction(
 
 export async function getUserReviewsAction() {
   const user = await getAuthenticatedUser();
-  return getUserReviews(user._id.toString());
+  const reviews = await getUserReviews(user._id.toString());
+  return serializeData(reviews);
 }

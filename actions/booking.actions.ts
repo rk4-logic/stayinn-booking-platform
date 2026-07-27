@@ -16,6 +16,7 @@ import { UserRole } from "@/types/user.types";
 import { BookingStatus, PaymentStatus } from "@/types/booking.types";
 import { type ActionResult } from "@/types/common.types";
 import { getAuthenticatedUser, requireRole } from "./user.actions";
+import { serializeData } from "@/lib/utils/serialize";
 
 export async function createBookingAction(
   formData: unknown
@@ -45,12 +46,14 @@ export async function createBookingAction(
 
 export async function getBookingAction(bookingId: string) {
   await getAuthenticatedUser();
-  return getBookingById(bookingId);
+  const booking = await getBookingById(bookingId);
+  return serializeData(booking);
 }
 
 export async function getUserBookingsAction(page = 1, limit = 10) {
   const user = await getAuthenticatedUser();
-  return getUserBookings(user._id.toString(), page, limit);
+  const result = await getUserBookings(user._id.toString(), page, limit);
+  return serializeData(result);
 }
 
 export async function getPropertyBookingsAction(
@@ -59,7 +62,8 @@ export async function getPropertyBookingsAction(
   limit = 10
 ) {
   await getAuthenticatedUser();
-  return getPropertyBookings(propertyId, page, limit);
+  const result = await getPropertyBookings(propertyId, page, limit);
+  return serializeData(result);
 }
 
 export async function getOwnerBookingsAction(page = 1, limit = 10) {

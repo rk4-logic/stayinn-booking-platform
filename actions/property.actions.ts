@@ -137,7 +137,8 @@ export async function searchPropertiesAction(
   page = 1,
   limit = 12
 ) {
-  return searchProperties(searchText, page, limit);
+  const result = await searchProperties(searchText, page, limit);
+  return serializeData(result);
 }
 
 export async function approvePropertyAction(

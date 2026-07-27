@@ -16,16 +16,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type AdminUser = Pick<
-  IUser,
-  | "_id"
-  | "firstName"
-  | "lastName"
-  | "email"
-  | "role"
-  | "imageUrl"
-  | "createdAt"
->;
+export type AdminUser = Omit<
+  Pick<
+    IUser,
+    | "_id"
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "role"
+    | "imageUrl"
+  >,
+  "_id"
+> & {
+  _id: string;
+  createdAt: string | Date;
+};
 
 interface AdminUserListProps {
   users: AdminUser[];

@@ -47,16 +47,28 @@ export async function requireRole(...roles: UserRole[]) {
 
 export async function getUsersAction() {
   await requireRole(UserRole.ADMIN);
-
-  const { connectDB } = await import("@/lib/db");
-  const User = (await import("@/models/User")).default;
-
   await connectDB();
 
-  return User.find({})
+  const users = await User.find({})
     .sort({ createdAt: -1 })
     .limit(50)
     .lean();
+
+  return users.map((user) => ({
+    _id: user._id.toString(),
+    clerkId: user.clerkId ?? "",
+    email: user.email ?? "",
+    firstName: user.firstName ?? "",
+    lastName: user.lastName ?? "",
+    imageUrl: user.imageUrl ?? "",
+    role: user.role ?? "customer",
+    createdAt: user.createdAt instanceof Date
+      ? user.createdAt.toISOString()
+      : String(user.createdAt ?? ""),
+    updatedAt: user.updatedAt instanceof Date
+      ? user.updatedAt.toISOString()
+      : String(user.updatedAt ?? ""),
+  }));
 }
 
 export async function requestOwnerRoleAction(): Promise<ActionResult<void>> {

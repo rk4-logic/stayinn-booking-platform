@@ -101,6 +101,7 @@ export async function getOwnerRequestsAction(): Promise<OwnerRequestType[]> {
     return [];
   }
 }
+
 export async function getUserOwnerRequestAction() {
   try {
     const user = await getAuthenticatedUser();
