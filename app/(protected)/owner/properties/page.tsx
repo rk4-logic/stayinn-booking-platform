@@ -6,6 +6,7 @@ import OwnerPropertyList from "@/components/owner/OwnerPropertyList";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, Hotel } from "lucide-react";
+import { serializeData } from "@/lib/utils/serialize";
 
 export const metadata = {
   title: "My Properties — StayInn",
@@ -13,6 +14,7 @@ export const metadata = {
 
 export default async function OwnerPropertiesPage() {
   const properties = await getOwnerPropertiesAction();
+  const serializedProperties = serializeData(properties ?? []);
 
   return (
     <div className="bg-gray-50 min-h-screen py-10">
@@ -29,7 +31,7 @@ export default async function OwnerPropertiesPage() {
           </Link>
         </PageHeader>
 
-        {!properties || properties.length === 0 ? (
+        {serializedProperties.length === 0 ? (
           <EmptyState
             icon={Hotel}
             title="No properties yet"
@@ -38,7 +40,7 @@ export default async function OwnerPropertiesPage() {
             actionHref="/owner/properties/new"
           />
         ) : (
-          <OwnerPropertyList properties={properties} />
+          <OwnerPropertyList properties={serializedProperties} />
         )}
       </Container>
     </div>

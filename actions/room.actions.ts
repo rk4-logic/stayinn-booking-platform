@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { serializeData } from "@/lib/utils/serialize";
 import {
   createRoomSchema,
   updateRoomSchema,
@@ -45,8 +46,12 @@ export async function createRoomAction(
     };
 
     const room = await createRoom(roomData);
+
+    // Revalidate route cache so Server Components update
     revalidatePath(`/owner/properties/${propertyId}/rooms`);
-    return { success: true, data: room };
+
+    // Serialize Mongoose ObjectIds & Dates to plain types before returning to Client Component
+    return { success: true, data: serializeData(room) };
   } catch (error) {
     return {
       success: false,
@@ -77,7 +82,9 @@ export async function updateRoomAction(
     if (!room) return { success: false, error: "Room not found" };
 
     revalidatePath(`/owner/properties/${propertyId}/rooms`);
-    return { success: true, data: room };
+
+    // Serialize Mongoose ObjectIds & Dates to plain types
+    return { success: true, data: serializeData(room) };
   } catch (error) {
     return {
       success: false,
@@ -108,7 +115,8 @@ export async function deleteRoomAction(
 }
 
 export async function getRoomAction(roomId: string) {
-  return getRoomById(roomId);
+  const room = await getRoomById(roomId);
+  return room ? serializeData(room) : null;
 }
 
 export async function getRoomsByPropertyAction(
@@ -116,7 +124,8 @@ export async function getRoomsByPropertyAction(
   page = 1,
   limit = 10
 ) {
-  return getRoomsByProperty(propertyId, page, limit);
+  const result = await getRoomsByProperty(propertyId, page, limit);
+  return serializeData(result);
 }
 
 export async function getAvailableRoomsAction(
@@ -125,5 +134,6 @@ export async function getAvailableRoomsAction(
   checkOut: Date,
   guests: number
 ) {
-  return getAvailableRooms(propertyId, checkIn, checkOut, guests);
+  const rooms = await getAvailableRooms(propertyId, checkIn, checkOut, guests);
+  return serializeData(rooms);
 }

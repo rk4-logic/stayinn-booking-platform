@@ -23,6 +23,7 @@ export interface UpdatePropertyData {
   contact?: IProperty["contact"];
   amenities?: string[];
   currency?: IProperty["currency"];
+  status?: IProperty["status"];
 }
 
 export interface GetPropertiesFilters {
@@ -72,12 +73,17 @@ export async function createProperty(data: CreatePropertyData) {
 export async function updateProperty(
   propertyId: string,
   ownerId: string,
-  data: UpdatePropertyData
+  data: UpdatePropertyData,
+  isAdmin = false
 ) {
   await connectDB();
 
+  const filter = isAdmin
+    ? { _id: propertyId, isDeleted: false }
+    : { _id: propertyId, ownerId, isDeleted: false };
+
   const property = await Property.findOneAndUpdate(
-    { _id: propertyId, ownerId, isDeleted: false },
+    filter,
     { $set: data },
     { new: true, runValidators: true }
   ).lean();
@@ -85,11 +91,19 @@ export async function updateProperty(
   return property ?? null;
 }
 
-export async function deleteProperty(propertyId: string, ownerId: string) {
+export async function deleteProperty(
+  propertyId: string,
+  ownerId: string,
+  isAdmin = false
+) {
   await connectDB();
 
+  const filter = isAdmin
+    ? { _id: propertyId, isDeleted: false }
+    : { _id: propertyId, ownerId, isDeleted: false };
+
   const property = await Property.findOneAndUpdate(
-    { _id: propertyId, ownerId, isDeleted: false },
+    filter,
     {
       $set: {
         isDeleted: true,
@@ -265,4 +279,21 @@ export async function toggleFeatured(propertyId: string) {
   ).lean();
 
   return updated ?? null;
+}
+
+export async function submitForReview(propertyId: string, ownerId: string) {
+  await connectDB();
+
+  const property = await Property.findOneAndUpdate(
+    {
+      _id: propertyId,
+      ownerId,
+      isDeleted: false,
+      status: PropertyStatus.DRAFT, // only draft can be submitted
+    },
+    { $set: { status: PropertyStatus.PENDING } },
+    { new: true }
+  ).lean();
+
+  return property ?? null;
 }

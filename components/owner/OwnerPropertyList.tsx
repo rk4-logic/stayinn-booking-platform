@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Edit, Trash2, Eye, BedDouble } from "lucide-react";
+import { Edit, Trash2, Eye, BedDouble, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ConfirmDialog from "../shared/ConfirmDialogue";
-import { deletePropertyAction } from "@/actions/property.actions";
+import { deletePropertyAction, submitPropertyForReviewAction } from "@/actions/property.actions";
 import { formatCurrency } from "@/lib/utils/formatCurrency";
 import { formatPropertyType } from "@/lib/utils/formatPropertyType";
 import { PropertyStatus } from "@/types/property.types";
@@ -26,33 +26,49 @@ export default function OwnerPropertyList({
 }: OwnerPropertyListProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleDelete = async () => {
     if (!deletingId) return;
-    setLoading(true);
+    setLoadingId(deletingId);
 
     const result = await deletePropertyAction(deletingId);
 
     if (result.success) {
-      toast.success("Property deleted successfully");
+      toast.success("Property deleted");
       router.refresh();
     } else {
-      toast.error(String(result.error) || "Failed to delete property");
+      toast.error(String(result.error) || "Failed to delete");
     }
 
-    setLoading(false);
+    setLoadingId(null);
     setDeletingId(null);
+  };
+
+  const handleSubmitForReview = async (propertyId: string) => {
+    setLoadingId(propertyId);
+
+    const result = await submitPropertyForReviewAction(propertyId);
+
+    if (result.success) {
+      toast.success("Submitted for admin review!");
+      router.refresh();
+    } else {
+      toast.error(String(result.error) || "Failed to submit");
+    }
+
+    setLoadingId(null);
   };
 
   return (
     <>
       <div className="space-y-4">
         {properties.map((property) => {
-          const coverImage =
-            property.images?.find((img: { url: string; isCover: boolean }) => img.isCover) ??
-            property.images?.[0];
           const propertyId = String(property._id);
+          const coverImage =
+            property.images?.find((img) => img.isCover) ??
+            property.images?.[0];
+          const isLoading = loadingId === propertyId;
 
           return (
             <div
@@ -61,7 +77,7 @@ export default function OwnerPropertyList({
             >
               {/* Image */}
               <div className="relative w-full sm:w-32 h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                {coverImage ? (
+                {coverImage?.url ? (
                   <Image
                     src={coverImage.url}
                     alt={property.name}
@@ -83,12 +99,15 @@ export default function OwnerPropertyList({
                       {property.name}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {property.location.city}, {property.location.country}
+                      {property.location.city},{" "}
+                      {property.location.country}
                     </p>
                   </div>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${PROPERTY_STATUS_COLORS[property.status] ?? PROPERTY_STATUS_COLORS.draft
-                      }`}
+                    className={`text-xs px-2 py-1 rounded-full font-medium capitalize shrink-0 ${
+                      PROPERTY_STATUS_COLORS[property.status] ??
+                      PROPERTY_STATUS_COLORS.draft
+                    }`}
                   >
                     {property.status}
                   </span>
@@ -99,45 +118,97 @@ export default function OwnerPropertyList({
                   <span>•</span>
                   <span>
                     From{" "}
-                    {formatCurrency(property.startingPrice, property.currency)}
+                    {formatCurrency(
+                      property.startingPrice,
+                      property.currency
+                    )}
                     /night
                   </span>
                   <span>•</span>
                   <span>{property.totalReviews} reviews</span>
                 </div>
 
+                {property.status === PropertyStatus.DRAFT && (
+                  <p className="text-xs text-blue-600">
+                    Add rooms then submit for review to go live.
+                  </p>
+                )}
+
                 {property.status === PropertyStatus.REJECTED && (
                   <p className="text-xs text-red-500">
-                    Your property was rejected. Please update and resubmit.
+                    Rejected. Update details and resubmit.
+                  </p>
+                )}
+
+                {property.status === PropertyStatus.PENDING && (
+                  <p className="text-xs text-yellow-600">
+                    Under admin review. We will notify you soon.
                   </p>
                 )}
               </div>
 
               {/* Actions */}
               <div className="flex sm:flex-col gap-2 shrink-0">
-                <Link href={`/properties/${property.slug}`}>
-                  <Button variant="outline" size="sm" className="gap-1 w-full">
-                    <Eye className="h-3 w-3" />
-                    View
+                {/* Submit for review — draft only */}
+                {property.status === PropertyStatus.DRAFT && (
+                  <Button
+                    size="sm"
+                    className="gap-1 w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => handleSubmitForReview(propertyId)}
+                    disabled={isLoading}
+                  >
+                    <Send className="h-3 w-3" />
+                    {isLoading ? "..." : "Submit"}
                   </Button>
-                </Link>
+                )}
+
+                {/* View — approved only */}
+                {property.status === PropertyStatus.APPROVED && (
+                  <Link href={`/properties/${property.slug}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 w-full"
+                    >
+                      <Eye className="h-3 w-3" />
+                      View
+                    </Button>
+                  </Link>
+                )}
+
+                {/* Edit */}
                 <Link href={`/owner/properties/${propertyId}/edit`}>
-                  <Button variant="outline" size="sm" className="gap-1 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 w-full"
+                    disabled={isLoading}
+                  >
                     <Edit className="h-3 w-3" />
                     Edit
                   </Button>
                 </Link>
+
+                {/* Rooms */}
                 <Link href={`/owner/properties/${propertyId}/rooms`}>
-                  <Button variant="outline" size="sm" className="gap-1 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 w-full"
+                    disabled={isLoading}
+                  >
                     <BedDouble className="h-3 w-3" />
                     Rooms
                   </Button>
                 </Link>
+
+                {/* Delete */}
                 <Button
                   variant="destructive"
                   size="sm"
                   className="gap-1 w-full"
                   onClick={() => setDeletingId(propertyId)}
+                  disabled={isLoading}
                 >
                   <Trash2 className="h-3 w-3" />
                   Delete
@@ -153,9 +224,9 @@ export default function OwnerPropertyList({
         onClose={() => setDeletingId(null)}
         onConfirm={handleDelete}
         title="Delete Property"
-        description="Are you sure you want to delete this property? This action cannot be undone."
+        description="Are you sure? This cannot be undone."
         confirmLabel="Delete"
-        loading={loading}
+        loading={!!loadingId}
       />
     </>
   );

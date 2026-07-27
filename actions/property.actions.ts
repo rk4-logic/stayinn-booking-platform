@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import {
   createPropertySchema,
   updatePropertySchema,
-  updatePropertyStatusSchema,
 } from "@/lib/validations/property.validation";
 import {
   createProperty,
@@ -19,10 +18,13 @@ import {
   toggleFeatured,
   searchProperties,
   type GetPropertiesFilters,
+  submitForReview,
 } from "@/services/property.service";
 import { UserRole } from "@/types/user.types";
 import { type ActionResult } from "@/types/common.types";
 import { getAuthenticatedUser, requireRole } from "./user.actions";
+import type { PropertyStatus } from "@/types/property.types";
+import { serializeData } from "@/lib/utils/serialize";
 
 export async function createPropertyAction(
   formData: unknown
@@ -101,15 +103,18 @@ export async function deletePropertyAction(
 }
 
 export async function getPropertyAction(propertyId: string) {
-  return getPropertyById(propertyId);
+  const property = await getPropertyById(propertyId);
+  return serializeData(property);
 }
 
 export async function getPropertyBySlugAction(slug: string) {
-  return getPropertyBySlug(slug);
+  const property = await getPropertyBySlug(slug);
+  return serializeData(property);
 }
 
 export async function getPropertiesAction(filters: GetPropertiesFilters = {}) {
-  return getProperties(filters);
+  const result = await getProperties(filters);
+  return serializeData(result);
 }
 
 export async function getOwnerPropertiesAction() {
@@ -120,7 +125,8 @@ export async function getOwnerPropertiesAction() {
       return [];
     }
 
-    return getOwnerProperties(user._id.toString());
+    const properties = await getOwnerProperties(user._id.toString());
+    return serializeData(properties);
   } catch {
     return [];
   }
@@ -184,28 +190,74 @@ export async function toggleFeaturedAction(
 
 export async function updatePropertyStatusAction(
   propertyId: string,
-  formData: unknown
+  data: { status: PropertyStatus }
 ): Promise<ActionResult<object>> {
   try {
-    const user = await requireRole(UserRole.ADMIN);
-
-    const parsed = updatePropertyStatusSchema.safeParse(formData);
-    if (!parsed.success) {
-      return { success: false, error: parsed.error.flatten().fieldErrors };
-    }
+    const user = await getAuthenticatedUser();
 
     const property = await updateProperty(
       propertyId,
       user._id.toString(),
-      {}
+      { status: data.status }
     );
 
-    revalidatePath("/admin/properties");
-    return { success: true, data: property ?? {} };
+    if (!property) return { success: false, error: "Property not found" };
+
+    revalidatePath("/owner/properties");
+    return { success: true, data: property };
   } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed",
+    };
+  }
+}
+
+export async function submitPropertyForReviewAction(
+  propertyId: string
+): Promise<ActionResult<void>> {
+  try {
+    const user = await getAuthenticatedUser();
+
+    const property = await submitForReview(
+      propertyId,
+      user._id.toString()
+    );
+
+    if (!property) {
+      return {
+        success: false,
+        error: "Property not found or already submitted",
+      };
+    }
+
+    revalidatePath("/owner/properties");
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed",
+    };
+  }
+}
+
+export async function adminDeletePropertyAction(
+  propertyId: string
+): Promise<ActionResult<void>> {
+  try {
+    const admin = await requireRole(UserRole.ADMIN);
+    const property = await deleteProperty(
+      propertyId,
+      admin._id.toString(),
+      true // isAdmin bypass
+    );
+    if (!property) return { success: false, error: "Property not found" };
+    revalidatePath("/admin/properties");
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete property",
     };
   }
 }
