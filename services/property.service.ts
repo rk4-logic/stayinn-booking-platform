@@ -38,27 +38,29 @@ export interface GetPropertiesFilters {
   limit?: number;
 }
 
+function buildLocation(location: CreatePropertyData["location"]) {
+  if (!location) return undefined;
+
+  return {
+    ...location,
+    coordinates:
+      location.latitude != null && location.longitude != null
+        ? {
+            type: "Point" as const,
+            coordinates: [location.longitude, location.latitude],
+          }
+        : undefined,
+  };
+}
 
 export async function createProperty(data: CreatePropertyData) {
   await connectDB();
 
-  // unique slug always generated from name — never from client input
   const slug = await generateUniqueSlug(data.name, Property);
-
-  const location = {
-    ...data.location,
-    coordinates:
-      data.location.latitude && data.location.longitude
-        ? {
-            type: "Point" as const,
-            coordinates: [data.location.longitude, data.location.latitude],
-          }
-        : undefined,
-  };
 
   const property = await Property.create({
     ...data,
-    location,
+    location: buildLocation(data.location),
     slug,
     status: PropertyStatus.DRAFT,
     rating: 0,
@@ -82,9 +84,15 @@ export async function updateProperty(
     ? { _id: propertyId, isDeleted: false }
     : { _id: propertyId, ownerId, isDeleted: false };
 
+  // Rebuild location with GeoJSON coordinates if location data exists
+  const updateData = {
+    ...data,
+    ...(data.location && { location: buildLocation(data.location) }),
+  };
+
   const property = await Property.findOneAndUpdate(
     filter,
-    { $set: data },
+    { $set: updateData },
     { new: true, runValidators: true }
   ).lean();
 

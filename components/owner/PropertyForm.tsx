@@ -71,7 +71,8 @@ export default function PropertyForm({
   const [amenities, setAmenities] = useState(
     initialData?.amenities.join(", ") ?? ""
   );
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [uploadedImages, setUploadedImages] =
+    useState<UploadedImage[]>(initialData?.images ?? []);
 
   const handleSubmit = async () => {
     if (!name.trim()) return toast.error("Property name is required");
