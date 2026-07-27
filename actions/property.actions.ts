@@ -43,7 +43,7 @@ export async function createPropertyAction(
     });
 
     revalidatePath("/owner/properties");
-    return { success: true, data: property };
+    return { success: true, data: serializeData(property) };
   } catch (error) {
     return {
       success: false,
@@ -74,7 +74,7 @@ export async function updatePropertyAction(
 
     revalidatePath("/owner/properties");
     revalidatePath(`/properties/${propertyId}`);
-    return { success: true, data: property };
+    return { success: true, data: serializeData(property) };
   } catch (error) {
     return {
       success: false,
@@ -148,7 +148,7 @@ export async function approvePropertyAction(
     await requireRole(UserRole.ADMIN);
     const property = await approveProperty(propertyId);
     revalidatePath("/admin/properties");
-    return { success: true, data: property ?? {} };
+    return { success: true, data: serializeData(property) ?? {} };
   } catch (error) {
     return {
       success: false,
@@ -164,7 +164,7 @@ export async function rejectPropertyAction(
     await requireRole(UserRole.ADMIN);
     const property = await rejectProperty(propertyId);
     revalidatePath("/admin/properties");
-    return { success: true, data: property ?? {} };
+    return { success: true, data: serializeData(property) ?? {} };
   } catch (error) {
     return {
       success: false,
@@ -180,7 +180,7 @@ export async function toggleFeaturedAction(
     await requireRole(UserRole.ADMIN);
     const property = await toggleFeatured(propertyId);
     revalidatePath("/admin/properties");
-    return { success: true, data: property ?? {} };
+    return { success: true, data: serializeData(property) ?? {} };
   } catch (error) {
     return {
       success: false,
@@ -205,7 +205,7 @@ export async function updatePropertyStatusAction(
     if (!property) return { success: false, error: "Property not found" };
 
     revalidatePath("/owner/properties");
-    return { success: true, data: property };
+    return { success: true, data: serializeData(property) };
   } catch (error) {
     return {
       success: false,

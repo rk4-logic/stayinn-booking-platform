@@ -112,6 +112,7 @@ export default function ImageUploader({
                 alt="Property image"
                 fill
                 className="object-cover"
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
               />
 
               {/* Cover badge */}

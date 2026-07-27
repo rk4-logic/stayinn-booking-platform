@@ -82,7 +82,9 @@ export default function OwnerPropertyList({
                     src={coverImage.url}
                     alt={property.name}
                     fill
+                    priority
                     className="object-cover"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400 text-xs">

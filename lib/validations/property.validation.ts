@@ -20,6 +20,15 @@ export const contactSchema = z.object({
   email: z.string().trim().email("Invalid email").optional(),
 });
 
+const uploadedImageSchema = z.object({
+  url: z.string().url(),
+  publicId: z.string().min(1),
+  isCover: z.boolean().default(false),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  alt: z.string().optional(),
+});
+
 export const createPropertySchema = z.object({
   name: z.string().trim()
     .min(3, "Minimum 3 characters")
@@ -33,6 +42,7 @@ export const createPropertySchema = z.object({
   contact: contactSchema,
   amenities: z.array(z.string().trim()).optional().default([]),
   currency: z.nativeEnum(Currency).optional().default(Currency.USD),
+  images: z.array(uploadedImageSchema).optional().default([]),
 });
 
 export const updatePropertySchema = createPropertySchema.partial();

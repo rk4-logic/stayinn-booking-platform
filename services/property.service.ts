@@ -3,6 +3,7 @@ import Property from "@/models/Property";
 import { IProperty, PropertyStatus } from "@/types/property.types";
 import { generateUniqueSlug } from "@/lib/utils/slug";
 import { getPaginationMeta } from "@/lib/utils/pagination";
+import type { UploadedImage } from "@/types/image.types";
 
 export interface CreatePropertyData {
   ownerId: string;
@@ -13,6 +14,7 @@ export interface CreatePropertyData {
   contact: IProperty["contact"];
   amenities?: string[];
   currency?: IProperty["currency"];
+  images?: UploadedImage[];
 }
 
 export interface UpdatePropertyData {
@@ -24,6 +26,7 @@ export interface UpdatePropertyData {
   amenities?: string[];
   currency?: IProperty["currency"];
   status?: IProperty["status"];
+  images?: UploadedImage[];
 }
 
 export interface GetPropertiesFilters {
