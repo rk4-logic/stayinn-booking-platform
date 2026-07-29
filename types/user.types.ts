@@ -32,3 +32,11 @@ export interface ClerkUserData {
   lastName?: string | null;
   imageUrl?: string | null;
 }
+
+export interface PopulatedUser {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  imageUrl?: string;
+}

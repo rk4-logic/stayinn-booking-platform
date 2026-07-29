@@ -8,9 +8,7 @@ export const metadata = {
 };
 
 export default async function OwnerBookingsPage() {
-  // const result = await getOwnerSideBookingsAction();
-  const response = await getOwnerSideBookingsAction();
-  const bookings = response.bookings ?? [];
+  const { bookings = [] } = await getOwnerSideBookingsAction();
 
   return (
     <div className="bg-gray-50 min-h-screen py-10">

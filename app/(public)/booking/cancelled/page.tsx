@@ -31,14 +31,14 @@ export default function BookingCancelledPage() {
           </div>
 
           {/* Info box */}
-          <div className="bg-white border rounded-xl p-5 text-left space-y-2">
+          <div className="bg-white border rounded-xl p-5 text-left space-y-2 shadow-sm">
             <p className="text-sm font-medium text-gray-900">
               What happened?
             </p>
             <ul className="text-sm text-gray-500 space-y-1 list-disc list-inside">
-              <li>You cancelled the payment on the Stripe checkout page</li>
+              <li>You cancelled the checkout process on Stripe</li>
               <li>Your card was not charged</li>
-              <li>The room is still available for booking</li>
+              <li>The room reservation has been released</li>
             </ul>
           </div>
 
@@ -53,7 +53,7 @@ export default function BookingCancelledPage() {
             <Link href="/properties">
               <Button className="gap-2 w-full sm:w-auto">
                 <RefreshCw className="h-4 w-4" />
-                Try Again
+                Find Another Room
               </Button>
             </Link>
           </div>

@@ -2,6 +2,7 @@ import mongoose, { Types } from "mongoose";
 import { IBaseDocument, Currency } from "./common.types";
 import type { Property } from "./property.types";
 import type { Room } from "./room.types";
+import type { PopulatedUser } from "./user.types";
 
 export enum BookingStatus {
   PENDING = "pending",
@@ -85,6 +86,8 @@ export interface BookingListItem {
     roomName?: string;
     roomType?: string;
   } | null;
+
+  userId?: PopulatedUser | string;
 }
 
 export interface BookingDates {

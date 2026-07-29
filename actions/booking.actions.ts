@@ -8,17 +8,15 @@ import {
   getUserBookings,
   getPropertyBookings,
   getOwnerBookings,
-  cancelBooking,
   updateBookingStatus,
   updatePaymentStatus,
   BookingService,
 } from "@/services/booking.service";
 import { UserRole } from "@/types/user.types";
-import { BookingStatus, PaymentStatus, type BookingListItem } from "@/types/booking.types";
+import { BookingStatus, PaymentStatus } from "@/types/booking.types";
 import { type ActionResult } from "@/types/common.types";
 import { getAuthenticatedUser, requireRole } from "./user.actions";
 import { serializeData } from "@/lib/utils/serialize";
-import { auth } from "@clerk/nextjs/server";
 
 export async function createBookingAction(
   formData: unknown
@@ -73,24 +71,6 @@ export async function getOwnerBookingsAction(page = 1, limit = 10) {
   return getOwnerBookings(user._id.toString(), page, limit);
 }
 
-export async function cancelBookingAction(
-  bookingId: string
-): Promise<ActionResult<object>> {
-  try {
-    const user = await getAuthenticatedUser();
-    const booking = await cancelBooking(bookingId, user._id.toString());
-    if (!booking) return { success: false, error: "Booking not found" };
-
-    revalidatePath("/dashboard/bookings");
-    return { success: true, data: booking };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Cancellation failed",
-    };
-  }
-}
-
 export async function updateBookingStatusAction(
   bookingId: string,
   status: BookingStatus
@@ -130,37 +110,39 @@ export async function updatePaymentStatusAction(
   }
 }
 
-export async function getOwnerSideBookingsAction(): Promise<{
-  success: boolean;
-  bookings?: BookingListItem[];
-  error?: string;
-}> {
+export async function getOwnerSideBookingsAction(page = 1, limit = 10) {
   try {
-    const { userId } = await auth();
-    if (!userId) return { success: false, error: "Unauthorized" };
-
-    const bookings = await BookingService.getOwnerBookings(userId);
-    return { success: true, bookings };
+    const user = await getAuthenticatedUser();
+    // Use MongoDB user._id, NOT clerkId
+    return await BookingService.getOwnerBookings(user._id.toString(), page, limit);
   } catch (error) {
     console.error("[GET_OWNER_BOOKINGS_ERROR]", error);
-    return { success: false, error: "Failed to fetch owner bookings." };
+    return { bookings: [], total: 0 };
   }
 }
 
-export async function getAdminBookingsAction(): Promise<{
-  success: boolean;
-  bookings?: BookingListItem[];
-  error?: string;
-}> {
+export async function getAdminBookingsAction(page = 1, limit = 20) {
   try {
-    const { userId } = await auth();
-    if (!userId) return { success: false, error: "Unauthorized" };
-
-    // You can add admin role validation check here if applicable
-    const bookings = await BookingService.getAdminBookings();
-    return { success: true, bookings };
+    await requireRole(UserRole.ADMIN);
+    return await BookingService.getAdminBookings(page, limit);
   } catch (error) {
     console.error("[GET_ADMIN_BOOKINGS_ERROR]", error);
-    return { success: false, error: "Failed to fetch admin bookings." };
+    return { bookings: [], total: 0 };
+  }
+}
+
+export async function cancelBookingAction(bookingId: string) {
+  try {
+    const user = await getAuthenticatedUser();
+    const booking = await BookingService.cancelBooking(bookingId, user._id.toString());
+    if (!booking) return { success: false, error: "Booking not found" };
+
+    revalidatePath("/dashboard/bookings");
+    return { success: true, data: booking };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Cancellation failed",
+    };
   }
 }

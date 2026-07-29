@@ -240,50 +240,118 @@ export async function getBookingsByDateRange(
   }).lean();
 }
 
+// Add these to services/booking.service.ts
+
 export class BookingService {
   /**
-   * Optimized Owner Bookings Query (2 DB queries max)
+   * Fetch all bookings for an Owner across all their properties
    */
-  static async getOwnerBookings(ownerId: string): Promise<BookingListItem[]> {
+  static async getOwnerBookings(ownerId: string, page = 1, limit = 10) {
     await connectDB();
 
-    // 1. Fetch all property IDs owned by this user
-    const ownerProperties = await Property.find({ ownerId, isDeleted: false })
+    const { page: safePage, limit: safeLimit, skip } = normalizePagination(page, limit);
+
+    // 1. Get properties owned by this MongoDB User ID
+    const ownerProperties = await Property.find({
+      ownerId: toObjectId(ownerId),
+      isDeleted: { $ne: true },
+    })
       .select("_id")
       .lean();
 
-    if (!ownerProperties.length) return [];
+    if (!ownerProperties.length) {
+      return { bookings: [], ...getPaginationMeta(0, safePage, safeLimit) };
+    }
 
     const propertyIds = ownerProperties.map((p) => p._id);
 
-    // 2. Single Query using $in operator for high scalability
-    const bookings = await Booking.find({
-      propertyId: { $in: propertyIds },
-      isDeleted: false,
-    })
-      .sort({ createdAt: -1 })
-      .populate("propertyId", "name location")
-      .populate("roomId", "roomName roomType")
-      .populate("userId", "firstName lastName email")
-      .lean();
+    // 2. Fetch bookings and populate Booker (userId), Property, and Room
+    const [bookings, total] = await Promise.all([
+      Booking.find({ propertyId: { $in: propertyIds }, ...ACTIVE_FILTER })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(safeLimit)
+        .populate({
+          path: "userId",
+          select: "firstName lastName email imageUrl",
+        })
+        .populate("propertyId", "name location")
+        .populate("roomId", "roomName roomType")
+        .lean(),
+      Booking.countDocuments({ propertyId: { $in: propertyIds }, ...ACTIVE_FILTER }),
+    ]);
 
-    return serializeData(bookings) as unknown as BookingListItem[];
+    const plainBookings = serializeData(bookings);
+
+    return {
+      bookings: plainBookings as unknown as BookingListItem[],
+      ...getPaginationMeta(total, safePage, safeLimit),
+    };
+  }
+
+  static async cancelBooking(bookingId: string, userId: string) {
+    await connectDB();
+
+    // Verify booking exists and belongs to the user or property owner
+    const booking = await Booking.findOne({
+      _id: toObjectId(bookingId),
+      $or: [{ userId: toObjectId(userId) }],
+      isDeleted: { $ne: true },
+    });
+
+    if (!booking) return null;
+
+    booking.status = BookingStatus.CANCELLED;
+    await booking.save();
+
+    return serializeData(booking);
   }
 
   /**
-   * Admin Bookings Query (Paginated / Limited)
+   * Fetch all platform bookings for Admin
    */
-  static async getAdminBookings(limit = 100): Promise<BookingListItem[]> {
+  static async getAdminBookings(page = 1, limit = 20) {
     await connectDB();
 
-    const bookings = await Booking.find({ isDeleted: false })
-      .sort({ createdAt: -1 })
-      .limit(limit)
+    const { page: safePage, limit: safeLimit, skip } = normalizePagination(page, limit);
+
+    const [bookings, total] = await Promise.all([
+      Booking.find({ ...ACTIVE_FILTER })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(safeLimit)
+        .populate({
+          path: "userId",
+          select: "firstName lastName email imageUrl",
+        })
+        .populate("propertyId", "name location")
+        .populate("roomId", "roomName roomType")
+        .lean(),
+      Booking.countDocuments({ ...ACTIVE_FILTER }),
+    ]);
+
+    const plainBookings = serializeData(bookings);
+
+    return {
+      bookings: plainBookings as unknown as BookingListItem[],
+      ...getPaginationMeta(total, safePage, safeLimit),
+    };
+  }
+
+  /**
+   * Fetch booking by Stripe Session ID (for success page)
+   */
+  static async getBookingByStripeSession(sessionId: string) {
+    await connectDB();
+
+    const booking = await Booking.findOne({
+      stripeSessionId: sessionId,
+      isDeleted: { $ne: true },
+    })
       .populate("propertyId", "name location")
       .populate("roomId", "roomName roomType")
-      .populate("userId", "firstName lastName email")
       .lean();
 
-    return serializeData(bookings) as unknown as BookingListItem[];
+    return booking ? serializeData(booking) : null;
   }
 }
