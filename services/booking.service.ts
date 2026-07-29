@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Booking from "@/models/Booking";
 import Property from "@/models/Property";
-import { BookingStatus, PaymentStatus, type CreateBookingData } from "@/types/booking.types";
+import { BookingStatus, PaymentStatus, type BookingListItem, type CreateBookingData } from "@/types/booking.types";
 import { getPaginationMeta, normalizePagination } from "@/lib/utils/pagination";
 import { toObjectId } from "@/lib/utils/object-id";
 import { ACTIVE_FILTER } from "@/lib/db/query";
 import { checkRoomAvailability } from "@/services/room.service";
+import { serializeData } from "@/lib/utils/serialize";
 
 function calculateTotalPrice(
   checkIn: Date,
@@ -237,4 +238,52 @@ export async function getBookingsByDateRange(
     checkIn: { $lte: endDate },
     checkOut: { $gte: startDate },
   }).lean();
+}
+
+export class BookingService {
+  /**
+   * Optimized Owner Bookings Query (2 DB queries max)
+   */
+  static async getOwnerBookings(ownerId: string): Promise<BookingListItem[]> {
+    await connectDB();
+
+    // 1. Fetch all property IDs owned by this user
+    const ownerProperties = await Property.find({ ownerId, isDeleted: false })
+      .select("_id")
+      .lean();
+
+    if (!ownerProperties.length) return [];
+
+    const propertyIds = ownerProperties.map((p) => p._id);
+
+    // 2. Single Query using $in operator for high scalability
+    const bookings = await Booking.find({
+      propertyId: { $in: propertyIds },
+      isDeleted: false,
+    })
+      .sort({ createdAt: -1 })
+      .populate("propertyId", "name location")
+      .populate("roomId", "roomName roomType")
+      .populate("userId", "firstName lastName email")
+      .lean();
+
+    return serializeData(bookings) as unknown as BookingListItem[];
+  }
+
+  /**
+   * Admin Bookings Query (Paginated / Limited)
+   */
+  static async getAdminBookings(limit = 100): Promise<BookingListItem[]> {
+    await connectDB();
+
+    const bookings = await Booking.find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate("propertyId", "name location")
+      .populate("roomId", "roomName roomType")
+      .populate("userId", "firstName lastName email")
+      .lean();
+
+    return serializeData(bookings) as unknown as BookingListItem[];
+  }
 }

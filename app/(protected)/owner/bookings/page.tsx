@@ -1,29 +1,25 @@
-import { getOwnerBookingsAction } from "@/actions/booking.actions";
+import { getOwnerSideBookingsAction } from "@/actions/booking.actions";
 import Container from "@/components/shared/Container";
 import PageHeader from "@/components/shared/PageHeader";
 import BookingList from "@/components/dashboard/BookingList";
-import type { BookingListItem } from "@/types/booking.types";
 
 export const metadata = {
   title: "Owner Bookings — StayInn",
 };
 
 export default async function OwnerBookingsPage() {
-  const result = await getOwnerBookingsAction(1, 20);
+  // const result = await getOwnerSideBookingsAction();
+  const response = await getOwnerSideBookingsAction();
+  const bookings = response.bookings ?? [];
 
   return (
     <div className="bg-gray-50 min-h-screen py-10">
       <Container>
         <PageHeader
-          title="Owner Bookings"
-          description="Review bookings for your properties"
+          title="Property Bookings"
+          description="All verified bookings across your listed properties"
         />
-        <BookingList
-          bookings={
-            (result.bookings ?? []) as unknown as BookingListItem[]
-          }
-          showCancelButton={false}
-        />
+        <BookingList bookings={bookings} showCancelButton={false} />
       </Container>
     </div>
   );

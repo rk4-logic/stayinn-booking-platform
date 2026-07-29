@@ -121,12 +121,12 @@ export default function BookingSummary({
 
       {/* Confirm Button */}
       <Button
-        className="w-full"
+        className="w-full gap-2"
         size="lg"
         onClick={onConfirm}
         disabled={loading}
       >
-        {loading ? "Confirming..." : "Confirm Booking"}
+        {loading ? "Redirecting to payment..." : `Pay ${formatCurrency(totalPrice, currency)}`}
       </Button>
 
       <p className="text-xs text-gray-400 text-center">

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createBookingAction } from "@/actions/booking.actions";
-import { useBookingStore } from "@/store";
 import RoomSelector from "./RoomSelector";
 import BookingSummary from "./BookingSummary";
 import BookingConfirmation from "./BookingConfirmation";
@@ -23,9 +21,8 @@ export default function BookingFlow({
     const [step, setStep] = useState<BookingStep>("select-room");
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
     const [loading, setLoading] = useState(false);
-    const [bookingId, setBookingId] = useState<string | null>(null);
+    const [bookingId] = useState<string | null>(null);
 
-    const clearBooking = useBookingStore((state) => state.clearBooking);
 
     const dates = { checkIn, checkOut };
     const nights = calculateNights(dates);
@@ -43,35 +40,44 @@ export default function BookingFlow({
 
         setLoading(true);
 
-        const result = await createBookingAction({
-            propertyId: String(property._id),
-            roomId: String(selectedRoom._id),
-            checkIn,
-            checkOut,
-            guests: {
-                adults: guestCount,
-                children: 0,
-                infants: 0,
-            },
-            pricePerNight: selectedRoom.pricePerNight,
-            currency: property.currency,
-        });
+        try {
+            const response = await fetch("/api/stripe/create-checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    propertyId: String(property._id),
+                    roomId: String(selectedRoom._id),
+                    checkIn: checkIn.toISOString(),
+                    checkOut: checkOut.toISOString(),
+                    adults: guestCount,
+                    children: 0,
+                    infants: 0,
+                }),
+            });
 
-        if (result.success) {
-            const booking = result.data as { _id: string };
-            setBookingId(String(booking._id));
-            setStep("confirmed");
-            clearBooking();
-            toast.success("Booking confirmed!");
-        } else {
-            toast.error(
-                typeof result.error === "string"
-                    ? result.error
-                    : "Booking failed. Please try again."
-            );
+            const data = await response.json();
+
+            // Handle server errors
+            if (!response.ok) {
+                toast.error(data.error || "Failed to initialize Stripe checkout.");
+                return;
+            }
+
+            // Redirect user to Stripe Checkout
+            if (data.url) {
+                window.location.href = data.url;
+                return;
+            }
+
+            toast.error("Stripe checkout URL was not returned.");
+        } catch (error) {
+            console.error("Stripe Checkout Error:", error);
+            toast.error("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     if (step === "confirmed" && bookingId) {
@@ -174,7 +180,7 @@ export default function BookingFlow({
                             </div>
                         </div>
                     )}
-                    
+
                     {/* Step indicator */}
                     <div className="border-t pt-4">
                         {(() => {
@@ -187,10 +193,10 @@ export default function BookingFlow({
                                             <div key={s} className="flex items-center gap-2">
                                                 <div
                                                     className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${i === currentStepIndex
-                                                            ? "bg-blue-600 text-white"
-                                                            : i < currentStepIndex
-                                                                ? "bg-green-500 text-white"
-                                                                : "bg-gray-200 text-gray-500"
+                                                        ? "bg-blue-600 text-white"
+                                                        : i < currentStepIndex
+                                                            ? "bg-green-500 text-white"
+                                                            : "bg-gray-200 text-gray-500"
                                                         }`}
                                                 >
                                                     {i + 1}

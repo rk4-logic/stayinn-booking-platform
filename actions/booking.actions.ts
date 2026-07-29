@@ -11,12 +11,14 @@ import {
   cancelBooking,
   updateBookingStatus,
   updatePaymentStatus,
+  BookingService,
 } from "@/services/booking.service";
 import { UserRole } from "@/types/user.types";
-import { BookingStatus, PaymentStatus } from "@/types/booking.types";
+import { BookingStatus, PaymentStatus, type BookingListItem } from "@/types/booking.types";
 import { type ActionResult } from "@/types/common.types";
 import { getAuthenticatedUser, requireRole } from "./user.actions";
 import { serializeData } from "@/lib/utils/serialize";
+import { auth } from "@clerk/nextjs/server";
 
 export async function createBookingAction(
   formData: unknown
@@ -125,5 +127,40 @@ export async function updatePaymentStatusAction(
       success: false,
       error: error instanceof Error ? error.message : "Failed",
     };
+  }
+}
+
+export async function getOwnerSideBookingsAction(): Promise<{
+  success: boolean;
+  bookings?: BookingListItem[];
+  error?: string;
+}> {
+  try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    const bookings = await BookingService.getOwnerBookings(userId);
+    return { success: true, bookings };
+  } catch (error) {
+    console.error("[GET_OWNER_BOOKINGS_ERROR]", error);
+    return { success: false, error: "Failed to fetch owner bookings." };
+  }
+}
+
+export async function getAdminBookingsAction(): Promise<{
+  success: boolean;
+  bookings?: BookingListItem[];
+  error?: string;
+}> {
+  try {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    // You can add admin role validation check here if applicable
+    const bookings = await BookingService.getAdminBookings();
+    return { success: true, bookings };
+  } catch (error) {
+    console.error("[GET_ADMIN_BOOKINGS_ERROR]", error);
+    return { success: false, error: "Failed to fetch admin bookings." };
   }
 }
