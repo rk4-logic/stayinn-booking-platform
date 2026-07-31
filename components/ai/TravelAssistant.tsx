@@ -41,69 +41,98 @@ export default function TravelAssistant() {
 
   const sendMessage = async () => {
     const text = input.trim();
+
     if (!text || loading) return;
 
-    const userMessage: Message = { role: "user", content: text };
+    const userMessage: Message = {
+      role: "user",
+      content: text,
+    };
 
+    // Append user message and prepare an empty assistant bubble
     setMessages((prev) => [
       ...prev,
       userMessage,
-      { role: "assistant", content: "" },
+      {
+        role: "assistant",
+        content: "",
+      },
     ]);
+
     setInput("");
     setLoading(true);
 
     try {
+      // Create request payload matching API expectations cleanly
+      const payloadMessages = [...messages, userMessage].filter(
+        (m, idx) => !(idx === 0 && m.role === "assistant")
+      );
+
       const response = await fetch("/api/ai/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: payloadMessages }),
       });
 
       if (!response.ok) {
-        throw new Error("Chat failed");
-      }
+        let errorMessage = "Something went wrong. Please try again.";
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) throw new Error("No reader");
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
+        if (response.status === 429) {
+          errorMessage = "The AI is rate-limited. Please wait a few seconds and try again.";
+        } else if (response.status === 500 || response.status === 404) {
+          errorMessage = "AI service is currently misconfigured or unavailable.";
+        }
 
         setMessages((prev) => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            content: updated[updated.length - 1].content + chunk,
+            content: errorMessage,
           };
           return updated;
         });
+        setLoading(false); // Fix: turn off loading state
+        return;
       }
-    } catch (error) {
-      console.error("Chat error:", error);
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            updated[lastIndex] = {
+              ...updated[lastIndex],
+              content: updated[lastIndex].content + chunk,
+            };
+            return updated;
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Chat error:", err);
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content:
-            "Sorry, I'm having trouble connecting. Please try again.",
+          content: "Network error. Please try again.",
         };
         return updated;
       });
     } finally {
-      setLoading(false);
+      setLoading(false); // Safely clear loader state
     }
   };
+
 
   // Don't show for non-signed-in users
   if (!isSignedIn) return null;
